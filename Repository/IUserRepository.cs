@@ -7,6 +7,6 @@ namespace kms.Repository
     public interface IUserRepository : ICrudRepository<User>
     {
         Task<User> GetByEmailAndPassword(string email, string password);
-        string CreateToken(User user);
+        Task<User> GetByEmail(string email);
     }
 }

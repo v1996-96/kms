@@ -16,6 +16,21 @@
           "lib/netstandard2.0/Dapper.dll": {}
         }
       },
+      "Dapper.FastCrud/2.5.0.39": {
+        "type": "package",
+        "dependencies": {
+          "Dapper": "1.50.2",
+          "NETStandard.Library": "1.6.1",
+          "System.ComponentModel.Annotations": "4.3.0",
+          "System.ComponentModel.TypeConverter": "4.3.0"
+        },
+        "compile": {
+          "lib/netstandard1.6/Dapper.FastCrud.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.6/Dapper.FastCrud.dll": {}
+        }
+      },
       "Humanizer/2.2.0": {
         "type": "package",
         "dependencies": {
@@ -5282,6 +5297,21 @@
         "lib/netstandard1.3/Dapper.xml",
         "lib/netstandard2.0/Dapper.dll",
         "lib/netstandard2.0/Dapper.xml"
+      ]
+    },
+    "Dapper.FastCrud/2.5.0.39": {
+      "sha512": "qTrB6bLpxvmvIugLhOW1bXej2wrnfTPGwEb057pzATUhb5JLkXKHX7eIAXPd1MJr1ua5IQGkmTEdIjc20NM9Xw==",
+      "type": "package",
+      "path": "dapper.fastcrud/2.5.0.39",
+      "files": [
+        "dapper.fastcrud.2.5.0.39.nupkg.sha512",
+        "dapper.fastcrud.nuspec",
+        "lib/net45/Dapper.FastCrud.dll",
+        "lib/net45/Dapper.FastCrud.xml",
+        "lib/net46/Dapper.FastCrud.dll",
+        "lib/net46/Dapper.FastCrud.xml",
+        "lib/netstandard1.6/Dapper.FastCrud.dll",
+        "lib/netstandard1.6/Dapper.FastCrud.xml"
       ]
     },
     "Humanizer/2.2.0": {
@@ -13512,6 +13542,7 @@
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.0": [
       "Dapper >= 1.50.4",
+      "Dapper.FastCrud >= 2.5.0.39",
       "Humanizer >= 2.2.0",
       "Microsoft.AspNetCore.All >= 2.0.6",
       "Microsoft.NETCore.App >= 2.0.0",
@@ -13562,6 +13593,10 @@
           "Dapper": {
             "target": "Package",
             "version": "[1.50.4, )"
+          },
+          "Dapper.FastCrud": {
+            "target": "Package",
+            "version": "[2.5.0.39, )"
           },
           "Humanizer": {
             "target": "Package",

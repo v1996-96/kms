@@ -28,37 +28,20 @@ namespace kms.Repository
         }
 
         public async Task<User> GetByEmailAndPassword(string email, string password)
-        {
-            var user = await db.QueryAsync<User>(
-                @"SELECT * FROM users WHERE email = @email AND password = @password LIMIT 1",
+            => await db.QuerySingleOrDefaultAsync<User>(
+                @"SELECT * FROM users WHERE email = @email AND password = @password",
                 new { email = email, password = md5.GetHash(password) });
 
-            return user == null ? null : user.FirstOrDefault();
-        }
-
-        public string CreateToken(User user) {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                configuration["Jwt:Issuer"],
-                configuration["Jwt:Issuer"],
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        public async Task<User> GetByEmail(string email)
+            => await db.QuerySingleOrDefaultAsync<User>(@"SELECT * FROM users WHERE email = @email", new { email = email });
 
         public async Task Add(User user)
         {
-            user.Password = md5.GetHash(user.Password);
-            await db.ExecuteAsync(@"insert into users (user_id, name, surname, email, password, avatar) values (@UserId, @Name, @Surname, @Email, @Password, @avatar)", user);
+            await db.ExecuteAsync(@"insert into users (name, surname, email, password, avatar) values (@Name, @Surname, @Email, @Password, @Avatar)", user);
         }
 
-        public Task<User> GetById(int id)
-        {
-            throw new System.NotImplementedException();
-        }
+        public async Task<User> GetById(int id)
+            => await db.QuerySingleOrDefaultAsync<User>(@"SELECT * FROM users WHERE user_id = @id", new { id = id });
 
         public Task<IEnumerable<User>> GetList()
         {

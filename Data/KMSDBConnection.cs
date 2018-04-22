@@ -1,3 +1,4 @@
+using Dapper.FastCrud;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
@@ -18,6 +19,9 @@ namespace kms.Data
         }
 
         public KMSDBConnection(string connectionString) {
+            OrmConfiguration.DefaultDialect = SqlDialect.PostgreSql;
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
             this._connection = new NpgsqlConnection(connectionString);
             this._connection.Open();
         }

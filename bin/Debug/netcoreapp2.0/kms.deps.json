@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "dddcbf2618c957a656c42b729e2cc5a11e650e8c"
+    "signature": "b8524e128ca9f11c301524f121b6cbc069df4019"
   },
   "compilationOptions": {
     "defines": [
@@ -24,6 +24,7 @@
       "kms/1.0.0": {
         "dependencies": {
           "Dapper": "1.50.4",
+          "Dapper.FastCrud": "2.5.0.39",
           "Humanizer": "2.2.0",
           "Microsoft.AspNetCore.All": "2.0.6",
           "Microsoft.NETCore.App": "2.0.0",
@@ -47,6 +48,20 @@
         },
         "compile": {
           "lib/netstandard2.0/Dapper.dll": {}
+        }
+      },
+      "Dapper.FastCrud/2.5.0.39": {
+        "dependencies": {
+          "Dapper": "1.50.4",
+          "NETStandard.Library": "2.0.0",
+          "System.ComponentModel.Annotations": "4.4.0",
+          "System.ComponentModel.TypeConverter": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.6/Dapper.FastCrud.dll": {}
+        },
+        "compile": {
+          "lib/netstandard1.6/Dapper.FastCrud.dll": {}
         }
       },
       "Humanizer/2.2.0": {
@@ -4461,6 +4476,13 @@
       "sha512": "sha512-t5DMz+1aEkBcyCgkj+6hJHNsUq3k/d67lVMTNzICEhVjPUI3Gt2kgotSK8S4SpziIbFPphnOEn8M6Q75ED5hRQ==",
       "path": "dapper/1.50.4",
       "hashPath": "dapper.1.50.4.nupkg.sha512"
+    },
+    "Dapper.FastCrud/2.5.0.39": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qTrB6bLpxvmvIugLhOW1bXej2wrnfTPGwEb057pzATUhb5JLkXKHX7eIAXPd1MJr1ua5IQGkmTEdIjc20NM9Xw==",
+      "path": "dapper.fastcrud/2.5.0.39",
+      "hashPath": "dapper.fastcrud.2.5.0.39.nupkg.sha512"
     },
     "Humanizer/2.2.0": {
       "type": "package",

@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace kms.Controllers
 {
     [Route("api/[controller]"), Authorize]
-    public class AuthController : Controller
+    public class AccountController : Controller
     {
         private readonly IAccountRepository _accountRepository;
-        public AuthController(IAccountRepository accountRepository)
+
+        public AccountController(IAccountRepository accountRepository)
         {
             this._accountRepository = accountRepository;
         }
@@ -29,11 +30,11 @@ namespace kms.Controllers
         public async Task<IActionResult> SignUp([FromBody] User user)
             => Ok(await _accountRepository.SignUp(user));
 
-        [HttpPost("refresh/{token}")]
+        [HttpPost("tokens/{token}/refresh")]
         public async Task<IActionResult> RefreshAccessToken(string token)
             => Ok(await _accountRepository.RefreshAccessToken(token));
 
-        [HttpPost("revoke/{token}")]
+        [HttpPost("tokens/{token}/revoke")]
         public async Task<IActionResult> RevokeAccessToken(string token) {
             await _accountRepository.RevokeRefreshToken(token);
             return Ok();

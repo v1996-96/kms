@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using kms.Data;
+using kms.Models;
 using kms.Repository;
 using kms.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,25 +43,33 @@ namespace kms
             services.AddScoped<IKMSDBConnection, KMSDBConnection>(provider => new KMSDBConnection(connectionString));
             services.AddSingleton<IConfiguration>(Configuration);
 
+            var jwtSection = Configuration.GetSection("jwt");
+            var jwtOptions = new JwtOptions();
+            jwtSection.Bind(jwtOptions);
+            services.Configure<JwtOptions>(jwtSection);
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                     options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
                             ValidateAudience = true,
-                            ValidateLifetime = true,
+                            ValidateLifetime = jwtOptions.ValidateLifetime,
                             ValidateIssuerSigningKey = true,
-                            ValidIssuer = Configuration["Jwt:Issuer"],
-                            ValidAudience = Configuration["Jwt:Issuer"],
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                            ValidIssuer = jwtOptions.Issuer,
+                            ValidAudience = jwtOptions.Issuer,
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
                         });
 
             // Data repositories
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IAccountRepository, AccountRepository>();
+            services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
 
             // Services
-            services.AddTransient<IPasswordHasher, PasswordHasher>();
-            services.AddTransient<IMd5HashService, Md5HashService>();
+            services.AddSingleton<IJwtHandlerService, JwtHandlerService>();
+            services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddSingleton<IMd5HashService, Md5HashService>();
 
             services.AddMvc();
         }
@@ -73,6 +83,8 @@ namespace kms
             }
 
             app.UseAuthentication();
+
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseMvc();
         }

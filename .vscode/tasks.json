@@ -10,6 +10,16 @@
                 "${workspaceFolder}/kms.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+          "label": "watch",
+          "command": "dotnet",
+          "type": "shell",
+          "args": [
+            "watch",
+            "run"
+          ],
+          "problemMatcher": "$msCompile"
         }
     ]
 }

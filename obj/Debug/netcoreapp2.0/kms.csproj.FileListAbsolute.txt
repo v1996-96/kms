@@ -1,10 +1,10 @@
+C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.csproj.CoreCompileInputs.cache
+C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.AssemblyInfoInputs.cache
+C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.AssemblyInfo.cs
 C:\Users\v1996\Desktop\projects\kms\bin\Debug\netcoreapp2.0\kms.deps.json
 C:\Users\v1996\Desktop\projects\kms\bin\Debug\netcoreapp2.0\kms.runtimeconfig.json
 C:\Users\v1996\Desktop\projects\kms\bin\Debug\netcoreapp2.0\kms.runtimeconfig.dev.json
 C:\Users\v1996\Desktop\projects\kms\bin\Debug\netcoreapp2.0\kms.dll
 C:\Users\v1996\Desktop\projects\kms\bin\Debug\netcoreapp2.0\kms.pdb
-C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.csproj.CoreCompileInputs.cache
-C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.AssemblyInfoInputs.cache
-C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.AssemblyInfo.cs
 C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.dll
 C:\Users\v1996\Desktop\projects\kms\obj\Debug\netcoreapp2.0\kms.pdb

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using kms.Data.Entities;
 using kms.Dtos;
 using kms.Models;
 using kms.Repository;
@@ -26,7 +27,7 @@ namespace kms.Controllers
 
         [HttpPost("signup")]
         [AllowAnonymous]
-        public async Task<IActionResult> SignUp([FromBody] User user)
+        public async Task<IActionResult> SignUp([FromBody] Users user)
             => Ok(await _accountRepository.SignUp(user));
 
         [HttpPost("refresh/{token}")]

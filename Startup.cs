@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using kms.Data;
+using kms.Data.Entities;
 using kms.Models;
 using kms.Repository;
 using kms.Services;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,7 +42,8 @@ namespace kms
         public void ConfigureServices(IServiceCollection services)
         {
             string connectionString = Configuration.GetConnectionString("KMSDBConnection");
-            services.AddScoped<IKMSDBConnection, KMSDBConnection>(provider => new KMSDBConnection(connectionString));
+            services.AddDbContext<KMSDBContext>(options => options.UseNpgsql(connectionString));
+
             services.AddSingleton<IConfiguration>(Configuration);
 
             var jwtSection = Configuration.GetSection("jwt");
@@ -62,14 +65,11 @@ namespace kms
                         });
 
             // Data repositories
-            services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IAccountRepository, AccountRepository>();
-            services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
 
             // Services
             services.AddSingleton<IJwtHandlerService, JwtHandlerService>();
-            services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
-            services.AddSingleton<IMd5HashService, Md5HashService>();
+            services.AddSingleton<IPasswordHasher<Users>, PasswordHasher<Users>>();
 
             services.AddMvc();
         }

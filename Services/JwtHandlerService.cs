@@ -1,6 +1,8 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
+using kms.Data.Entities;
 using kms.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -23,7 +25,7 @@ namespace kms.Services
             _jwtHeader = new JwtHeader(_signingCredentials);
         }
 
-        public Jwt Create(User user)
+        public Jwt Create(Users user)
         {
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.AddMinutes(_options.ExpiryMinutes);
@@ -37,6 +39,7 @@ namespace kms.Services
                 {"aud", _options.Issuer},
                 {"iat", iat},
                 {"exp", exp},
+                {ClaimTypes.Name, user.UserId}
             };
             var jwt = new JwtSecurityToken(_jwtHeader, payload);
             var token = _jwtSecurityTokenHandler.WriteToken(jwt);

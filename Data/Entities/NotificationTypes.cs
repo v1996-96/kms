@@ -10,7 +10,7 @@ namespace kms.Data.Entities
             Notifications = new HashSet<Notifications>();
         }
 
-        public int NotificationTypeId { get; set; }
+        public string NotificationTypeSlug { get; set; }
         public string Name { get; set; }
 
         public ICollection<Notifications> Notifications { get; set; }

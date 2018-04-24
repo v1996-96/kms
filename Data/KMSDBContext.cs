@@ -391,15 +391,17 @@ namespace kms.Data
                     .HasColumnName("meta")
                     .HasColumnType("json");
 
-                entity.Property(e => e.TimeFired).HasColumnName("time_fired");
+                entity.Property(e => e.NotificationTypeSlug)
+                    .IsRequired()
+                    .HasColumnName("notification_type_slug");
 
-                entity.Property(e => e.TypeId).HasColumnName("type_id");
+                entity.Property(e => e.TimeFired).HasColumnName("time_fired");
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
 
-                entity.HasOne(d => d.Type)
+                entity.HasOne(d => d.NotificationTypeSlugNavigation)
                     .WithMany(p => p.Notifications)
-                    .HasForeignKey(d => d.TypeId)
+                    .HasForeignKey(d => d.NotificationTypeSlug)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_notifications_notification_types_1");
 
@@ -429,11 +431,13 @@ namespace kms.Data
 
             modelBuilder.Entity<NotificationTypes>(entity =>
             {
-                entity.HasKey(e => e.NotificationTypeId);
+                entity.HasKey(e => e.NotificationTypeSlug);
 
                 entity.ToTable("notification_types");
 
-                entity.Property(e => e.NotificationTypeId).HasColumnName("notification_type_id");
+                entity.Property(e => e.NotificationTypeSlug)
+                    .HasColumnName("notification_type_slug")
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -442,11 +446,13 @@ namespace kms.Data
 
             modelBuilder.Entity<Permissions>(entity =>
             {
-                entity.HasKey(e => e.PermissionId);
+                entity.HasKey(e => e.PermissionSlug);
 
                 entity.ToTable("permissions");
 
-                entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+                entity.Property(e => e.PermissionSlug)
+                    .HasColumnName("permission_slug")
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -455,11 +461,13 @@ namespace kms.Data
 
             modelBuilder.Entity<ProjectPermissions>(entity =>
             {
-                entity.HasKey(e => e.ProjectPermissionId);
+                entity.HasKey(e => e.ProjectPermissionSlug);
 
                 entity.ToTable("project_permissions");
 
-                entity.Property(e => e.ProjectPermissionId).HasColumnName("project_permission_id");
+                entity.Property(e => e.ProjectPermissionSlug)
+                    .HasColumnName("project_permission_slug")
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -468,17 +476,17 @@ namespace kms.Data
 
             modelBuilder.Entity<ProjectRolePermissions>(entity =>
             {
-                entity.HasKey(e => new { e.ProjectRoleId, e.ProjectPermissionId });
+                entity.HasKey(e => new { e.ProjectRoleId, e.ProjectPermissionSlug });
 
                 entity.ToTable("project_role_permissions");
 
                 entity.Property(e => e.ProjectRoleId).HasColumnName("project_role_id");
 
-                entity.Property(e => e.ProjectPermissionId).HasColumnName("project_permission_id");
+                entity.Property(e => e.ProjectPermissionSlug).HasColumnName("project_permission_slug");
 
-                entity.HasOne(d => d.ProjectPermission)
+                entity.HasOne(d => d.ProjectPermissionSlugNavigation)
                     .WithMany(p => p.ProjectRolePermissions)
-                    .HasForeignKey(d => d.ProjectPermissionId)
+                    .HasForeignKey(d => d.ProjectPermissionSlug)
                     .HasConstraintName("fk_role_permissions_permissions_1");
 
                 entity.HasOne(d => d.ProjectRole)
@@ -637,17 +645,17 @@ namespace kms.Data
 
             modelBuilder.Entity<RolePermissions>(entity =>
             {
-                entity.HasKey(e => new { e.RoleId, e.PermissionId });
+                entity.HasKey(e => new { e.RoleId, e.PermissionSlug });
 
                 entity.ToTable("role_permissions");
 
                 entity.Property(e => e.RoleId).HasColumnName("role_id");
 
-                entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+                entity.Property(e => e.PermissionSlug).HasColumnName("permission_slug");
 
-                entity.HasOne(d => d.Permission)
+                entity.HasOne(d => d.PermissionSlugNavigation)
                     .WithMany(p => p.RolePermissions)
-                    .HasForeignKey(d => d.PermissionId)
+                    .HasForeignKey(d => d.PermissionSlug)
                     .HasConstraintName("fk_role_permissions_permissions_1");
 
                 entity.HasOne(d => d.Role)
@@ -695,7 +703,9 @@ namespace kms.Data
                     .IsRequired()
                     .HasColumnName("slug");
 
-                entity.Property(e => e.TemplateTypeId).HasColumnName("template_type_id");
+                entity.Property(e => e.TemplateTypeSlug)
+                    .IsRequired()
+                    .HasColumnName("template_type_slug");
 
                 entity.Property(e => e.Title).HasColumnName("title");
 
@@ -711,9 +721,9 @@ namespace kms.Data
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_templates_projects_1");
 
-                entity.HasOne(d => d.TemplateType)
+                entity.HasOne(d => d.TemplateTypeSlugNavigation)
                     .WithMany(p => p.Templates)
-                    .HasForeignKey(d => d.TemplateTypeId)
+                    .HasForeignKey(d => d.TemplateTypeSlug)
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("fk_templates_template_types_1");
             });
@@ -752,19 +762,17 @@ namespace kms.Data
 
             modelBuilder.Entity<TemplateTypes>(entity =>
             {
-                entity.HasKey(e => e.TemplateTypeId);
+                entity.HasKey(e => e.TemplateTypeSlug);
 
                 entity.ToTable("template_types");
 
-                entity.Property(e => e.TemplateTypeId)
-                    .HasColumnName("template_type_id")
+                entity.Property(e => e.TemplateTypeSlug)
+                    .HasColumnName("template_type_slug")
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnName("name");
-
-                entity.Property(e => e.System).HasColumnName("system");
             });
 
             modelBuilder.Entity<UserCompetences>(entity =>

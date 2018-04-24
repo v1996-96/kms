@@ -11,17 +11,17 @@ namespace kms.Data.Entities
         }
 
         public int TemplateId { get; set; }
-        public int TemplateTypeId { get; set; }
+        public string TemplateTypeSlug { get; set; }
         public int? ProjectId { get; set; }
         public int? CreatorId { get; set; }
         public string Slug { get; set; }
         public string Title { get; set; }
-        public DateTime DateCreated { get; set; }
         public string Description { get; set; }
+        public DateTime DateCreated { get; set; }
 
         public Users Creator { get; set; }
         public Projects Project { get; set; }
-        public TemplateTypes TemplateType { get; set; }
+        public TemplateTypes TemplateTypeSlugNavigation { get; set; }
         public ICollection<TemplateText> TemplateText { get; set; }
     }
 }

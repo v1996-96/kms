@@ -10,9 +10,8 @@ namespace kms.Data.Entities
             Templates = new HashSet<Templates>();
         }
 
-        public int TemplateTypeId { get; set; }
+        public string TemplateTypeSlug { get; set; }
         public string Name { get; set; }
-        public bool System { get; set; }
 
         public ICollection<Templates> Templates { get; set; }
     }

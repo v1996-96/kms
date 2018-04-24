@@ -10,7 +10,7 @@ namespace kms.Data.Entities
             RolePermissions = new HashSet<RolePermissions>();
         }
 
-        public int PermissionId { get; set; }
+        public string PermissionSlug { get; set; }
         public string Name { get; set; }
 
         public ICollection<RolePermissions> RolePermissions { get; set; }

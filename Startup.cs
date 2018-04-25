@@ -66,6 +66,7 @@ namespace kms
 
             // Data repositories
             services.AddTransient<IAccountRepository, AccountRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
 
             // Services
             services.AddSingleton<IJwtHandlerService, JwtHandlerService>();

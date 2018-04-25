@@ -53,6 +53,18 @@ namespace kms.Repository
                 throw new Exception("Refresh token was not found.");
             }
 
+            refreshToken.Revoked = true;
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task RevokeAllRefreshTokens(string token)
+        {
+            var refreshToken = await _db.RefreshTokens.SingleOrDefaultAsync(t => t.Token == token);
+            if (refreshToken == null)
+            {
+                throw new Exception("Refresh token was not found.");
+            }
+
             var refreshTokens = await _db.RefreshTokens.Where(t => t.UserId == refreshToken.UserId).ToListAsync();
 
             refreshTokens.ForEach(t => t.Revoked = true);
@@ -76,7 +88,7 @@ namespace kms.Repository
                 Token = _passwordHasher.HashPassword(user, Guid.NewGuid().ToString()).Replace("+", string.Empty).Replace("=", string.Empty).Replace("/", string.Empty),
                 UserId = user.UserId,
                 Revoked = false,
-                TimeCreated = DateTime.Now
+                TimeCreated = DateTime.UtcNow
             };
 
             _db.RefreshTokens.Add(refreshToken);
@@ -96,6 +108,8 @@ namespace kms.Repository
 
             var unhahshedPassword = user.Password;
             user.Password = _passwordHasher.HashPassword(user, user.Password);
+            user.DateRegistered = DateTime.UtcNow;
+
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 

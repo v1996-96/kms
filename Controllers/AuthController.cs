@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using kms.Data.Entities;
-using kms.Dtos;
 using kms.Models;
 using kms.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -35,8 +34,14 @@ namespace kms.Controllers
             => Ok(await _accountRepository.RefreshAccessToken(token));
 
         [HttpPost("revoke/{token}")]
-        public async Task<IActionResult> RevokeAccessToken(string token) {
+        public async Task<IActionResult> RevokeRefreshToken(string token) {
             await _accountRepository.RevokeRefreshToken(token);
+            return Ok();
+        }
+
+        [HttpPost("revokeall/{token}")]
+        public async Task<IActionResult> RevokeAllRefreshTokens(string token) {
+            await _accountRepository.RevokeAllRefreshTokens(token);
             return Ok();
         }
     }

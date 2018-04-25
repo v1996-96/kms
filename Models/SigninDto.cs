@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace kms.Dtos
+namespace kms.Models
 {
     public class SigninDto
     {

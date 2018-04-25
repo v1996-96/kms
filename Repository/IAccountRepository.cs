@@ -10,5 +10,6 @@ namespace kms.Repository
         Task<Jwt> SignIn(string email, string password);
         Task<Jwt> RefreshAccessToken(string token);
         Task RevokeRefreshToken(string token);
+        Task RevokeAllRefreshTokens(string token);
     }
 }

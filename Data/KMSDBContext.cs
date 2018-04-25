@@ -1,14 +1,12 @@
 ﻿using System;
-using kms.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace kms.Data
+namespace kms.Data.Entities
 {
     public partial class KMSDBContext : DbContext
     {
         public KMSDBContext(DbContextOptions<KMSDBContext> options) : base(options) {}
-
         public virtual DbSet<Activity> Activity { get; set; }
         public virtual DbSet<Attachments> Attachments { get; set; }
         public virtual DbSet<Bookmarks> Bookmarks { get; set; }
@@ -23,7 +21,6 @@ namespace kms.Data
         public virtual DbSet<LastSeenDocuments> LastSeenDocuments { get; set; }
         public virtual DbSet<Notifications> Notifications { get; set; }
         public virtual DbSet<NotificationsRead> NotificationsRead { get; set; }
-        public virtual DbSet<NotificationTypes> NotificationTypes { get; set; }
         public virtual DbSet<Permissions> Permissions { get; set; }
         public virtual DbSet<ProjectPermissions> ProjectPermissions { get; set; }
         public virtual DbSet<ProjectRolePermissions> ProjectRolePermissions { get; set; }
@@ -391,19 +388,9 @@ namespace kms.Data
                     .HasColumnName("meta")
                     .HasColumnType("json");
 
-                entity.Property(e => e.NotificationTypeSlug)
-                    .IsRequired()
-                    .HasColumnName("notification_type_slug");
-
                 entity.Property(e => e.TimeFired).HasColumnName("time_fired");
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
-
-                entity.HasOne(d => d.NotificationTypeSlugNavigation)
-                    .WithMany(p => p.Notifications)
-                    .HasForeignKey(d => d.NotificationTypeSlug)
-                    .OnDelete(DeleteBehavior.SetNull)
-                    .HasConstraintName("fk_notifications_notification_types_1");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
@@ -427,21 +414,6 @@ namespace kms.Data
                     .WithOne(p => p.NotificationsRead)
                     .HasForeignKey<NotificationsRead>(d => d.UserId)
                     .HasConstraintName("fk_notifications_read_users_1");
-            });
-
-            modelBuilder.Entity<NotificationTypes>(entity =>
-            {
-                entity.HasKey(e => e.NotificationTypeSlug);
-
-                entity.ToTable("notification_types");
-
-                entity.Property(e => e.NotificationTypeSlug)
-                    .HasColumnName("notification_type_slug")
-                    .ValueGeneratedNever();
-
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasColumnName("name");
             });
 
             modelBuilder.Entity<Permissions>(entity =>

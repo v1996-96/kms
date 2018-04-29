@@ -29,25 +29,25 @@ namespace kms.Services
         {
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.AddMinutes(_options.ExpiryMinutes);
-            var centuryBegin = new DateTime(1970,1,1).ToUniversalTime();
-            var exp = (long)(new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
-            var iat = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
             var payload = new JwtPayload
             {
                 {"sub", user.UserId},
                 {"iss", _options.Issuer},
                 {"aud", _options.Issuer},
-                {"iat", iat},
-                {"exp", exp},
+                {"iat", DateTimeToUnixUtc(nowUtc)},
+                {"exp", DateTimeToUnixUtc(expires)},
                 {ClaimTypes.Name, user.UserId}
             };
             var jwt = new JwtSecurityToken(_jwtHeader, payload);
             var token = _jwtSecurityTokenHandler.WriteToken(jwt);
 
             return new Jwt{
-                AccessToken = token,
-                Expires = exp
+                AccessToken = token
             };
+        }
+
+        private static long DateTimeToUnixUtc(DateTime time) {
+            return (long)(time - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
         }
     }
 }

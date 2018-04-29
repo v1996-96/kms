@@ -38,9 +38,14 @@ namespace kms.Repository
                 throw new Exception("Refresh token was revoked");
             }
 
+            // Create new jwt
             var user = await _db.Users.SingleOrDefaultAsync(u => u.UserId == refreshToken.UserId);
             var jwt = _jwtHandler.Create(user);
             jwt.RefreshToken = refreshToken.Token;
+
+            // Update existing refresh token
+            refreshToken.TimeCreated = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
 
             return jwt;
         }

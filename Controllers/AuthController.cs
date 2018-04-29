@@ -30,17 +30,17 @@ namespace kms.Controllers
             => Ok(await _accountRepository.SignUp(user));
 
         [HttpPost("refresh/{token}")]
-        public async Task<IActionResult> RefreshAccessToken(string token)
+        public async Task<IActionResult> RefreshAccessToken([FromRoute] string token)
             => Ok(await _accountRepository.RefreshAccessToken(token));
 
         [HttpPost("revoke/{token}")]
-        public async Task<IActionResult> RevokeRefreshToken(string token) {
+        public async Task<IActionResult> RevokeRefreshToken([FromRoute] string token) {
             await _accountRepository.RevokeRefreshToken(token);
             return Ok();
         }
 
         [HttpPost("revokeall/{token}")]
-        public async Task<IActionResult> RevokeAllRefreshTokens(string token) {
+        public async Task<IActionResult> RevokeAllRefreshTokens([FromRoute] string token) {
             await _accountRepository.RevokeAllRefreshTokens(token);
             return Ok();
         }

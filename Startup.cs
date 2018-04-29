@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Serialization;
 
 namespace kms
 {
@@ -72,7 +73,16 @@ namespace kms
             services.AddSingleton<IJwtHandlerService, JwtHandlerService>();
             services.AddSingleton<IPasswordHasher<Users>, PasswordHasher<Users>>();
 
-            services.AddMvc();
+            var CorsConfig = Configuration.GetSection("CORS");
+            services.AddCors(options => {
+                options.AddPolicy("AppCors", builder => builder.WithOrigins(CorsConfig["host"]).AllowAnyHeader().AllowAnyMethod());
+            });
+
+            services.AddMvc().AddJsonOptions(x => {
+                x.SerializerSettings.ContractResolver = new DefaultContractResolver {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,6 +96,8 @@ namespace kms
             app.UseAuthentication();
 
             app.UseMiddleware<ErrorHandlerMiddleware>();
+
+            app.UseCors("AppCors");
 
             app.UseMvc();
         }

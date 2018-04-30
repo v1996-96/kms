@@ -1,8 +1,9 @@
 ﻿using System;
+using kms.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace kms.Data.Entities
+namespace kms.Data
 {
     public partial class KMSDBContext : DbContext
     {
@@ -189,9 +190,7 @@ namespace kms.Data.Entities
 
                 entity.ToTable("competences");
 
-                entity.Property(e => e.CompetenceId)
-                    .HasColumnName("competence_id")
-                    .ValueGeneratedNever();
+                entity.Property(e => e.CompetenceId).HasColumnName("competence_id");
 
                 entity.Property(e => e.Name)
                     .IsRequired()
@@ -334,19 +333,13 @@ namespace kms.Data.Entities
 
                 entity.Property(e => e.InviteTokenId).HasColumnName("invite_token_id");
 
+                entity.Property(e => e.Email).HasColumnName("email");
+
                 entity.Property(e => e.TimeCreated).HasColumnName("time_created");
 
                 entity.Property(e => e.Token)
                     .IsRequired()
                     .HasColumnName("token");
-
-                entity.Property(e => e.UserId).HasColumnName("user_id");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.InviteTokens)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_invite_tokens_users_1");
             });
 
             modelBuilder.Entity<LastSeenDocuments>(entity =>

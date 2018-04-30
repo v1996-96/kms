@@ -16,7 +16,6 @@ namespace kms.Data.Entities
             DocumentText = new HashSet<DocumentText>();
             Documents = new HashSet<Documents>();
             FollowedProjects = new HashSet<FollowedProjects>();
-            InviteTokens = new HashSet<InviteTokens>();
             LastSeenDocuments = new HashSet<LastSeenDocuments>();
             Notifications = new HashSet<Notifications>();
             ProjectTeam = new HashSet<ProjectTeam>();
@@ -46,7 +45,6 @@ namespace kms.Data.Entities
         public ICollection<DocumentText> DocumentText { get; set; }
         public ICollection<Documents> Documents { get; set; }
         public ICollection<FollowedProjects> FollowedProjects { get; set; }
-        public ICollection<InviteTokens> InviteTokens { get; set; }
         public ICollection<LastSeenDocuments> LastSeenDocuments { get; set; }
         public ICollection<Notifications> Notifications { get; set; }
         public ICollection<ProjectTeam> ProjectTeam { get; set; }

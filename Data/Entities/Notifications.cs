@@ -10,6 +10,7 @@ namespace kms.Data.Entities
         public string Content { get; set; }
         public DateTime TimeFired { get; set; }
         public string Meta { get; set; }
+
         public Users User { get; set; }
     }
 }

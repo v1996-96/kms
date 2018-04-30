@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using kms.Data;
 using kms.Data.Entities;
 using kms.Models;
 using kms.Repository;
@@ -19,8 +20,8 @@ namespace kms.Controllers
             this._userRepository = userRepository;
         }
 
-        [HttpGet("{id?}")]
-        public async Task<IActionResult> GetProfile(int? id)
-            => Ok(await _userRepository.GetProfile(id.HasValue ? id.Value : int.Parse(User.Identity.Name)));
+        [HttpGet]
+        public async Task<IActionResult> GetProfile()
+            => Ok(await _userRepository.GetProfile(int.Parse(User.Identity.Name)));
     }
 }

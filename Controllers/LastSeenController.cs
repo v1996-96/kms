@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using kms.Data.Entities;
+using kms.Data;
 using kms.Models;
 using kms.Repository;
 using Microsoft.AspNetCore.Authorization;

@@ -48,7 +48,14 @@ namespace kms.Controllers
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UserDto updatedUser) {
+            if (updatedUser == null) {
+                return BadRequest();
+            }
+
             var user = await GetById(id);
+            if (user == null) {
+                return NotFound();
+            }
 
             // If email was changed
             if (updatedUser.Email != user.Email) {

@@ -559,6 +559,8 @@ namespace kms.Data
 
                 entity.Property(e => e.ExternalLink).HasColumnName("external_link");
 
+                entity.Property(e => e.HousingProjectId).HasColumnName("housing_project_id");
+
                 entity.Property(e => e.Name).HasColumnName("name");
 
                 entity.Property(e => e.ProjectId).HasColumnName("project_id");
@@ -571,8 +573,13 @@ namespace kms.Data
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_quick_links_documents_1");
 
+                entity.HasOne(d => d.HousingProject)
+                    .WithMany(p => p.QuickLinksHousingProject)
+                    .HasForeignKey(d => d.HousingProjectId)
+                    .HasConstraintName("fk_quick_links_projects_2");
+
                 entity.HasOne(d => d.Project)
-                    .WithMany(p => p.QuickLinks)
+                    .WithMany(p => p.QuickLinksProject)
                     .HasForeignKey(d => d.ProjectId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("fk_quick_links_projects_1");

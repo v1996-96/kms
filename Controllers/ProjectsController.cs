@@ -38,5 +38,10 @@ namespace kms.Controllers
             var results = projects.Select(p => new ProjectShortDto(p));
             return Ok(new { count, results });
         }
+
+        // [HttpGet("{id:int}")]
+        // public async Task<IActionResult> GetSingle([FromRoute] int id) {
+
+        // }
     }
 }

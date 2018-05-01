@@ -11,8 +11,10 @@ namespace kms.Data.Entities
         public int? UserId { get; set; }
         public string ExternalLink { get; set; }
         public string Name { get; set; }
+        public int? HousingProjectId { get; set; }
 
         public Documents Document { get; set; }
+        public Projects HousingProject { get; set; }
         public Projects Project { get; set; }
         public Users User { get; set; }
     }

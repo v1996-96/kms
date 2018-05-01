@@ -11,7 +11,8 @@ namespace kms.Data.Entities
             Documents = new HashSet<Documents>();
             FollowedProjects = new HashSet<FollowedProjects>();
             ProjectTeam = new HashSet<ProjectTeam>();
-            QuickLinks = new HashSet<QuickLinks>();
+            QuickLinksHousingProject = new HashSet<QuickLinks>();
+            QuickLinksProject = new HashSet<QuickLinks>();
             Templates = new HashSet<Templates>();
         }
 
@@ -30,7 +31,8 @@ namespace kms.Data.Entities
         public ICollection<Documents> Documents { get; set; }
         public ICollection<FollowedProjects> FollowedProjects { get; set; }
         public ICollection<ProjectTeam> ProjectTeam { get; set; }
-        public ICollection<QuickLinks> QuickLinks { get; set; }
+        public ICollection<QuickLinks> QuickLinksHousingProject { get; set; }
+        public ICollection<QuickLinks> QuickLinksProject { get; set; }
         public ICollection<Templates> Templates { get; set; }
     }
 }

@@ -20,11 +20,11 @@ namespace kms.Models
                 Avatar = user.Avatar;
                 DateRegistered = user.DateRegistered;
 
-                if (user.UserCompetences.Count > 0) {
+                if (user.UserCompetences != null && user.UserCompetences.Count > 0) {
                     Competences = user.UserCompetences.Where(c => c.Competence != null).Select(c => new CompetenceDto(c.Competence));
                 }
 
-                if (user.UserRoles.Count > 0) {
+                if (user.UserRoles != null && user.UserRoles.Count > 0) {
                     Roles = user.UserRoles.Where(c => c.Role != null).Select(c => new RoleShortDto(c.Role));
                 }
             }

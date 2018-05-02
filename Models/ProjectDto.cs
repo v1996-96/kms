@@ -9,7 +9,7 @@ namespace kms.Models
     {
         public ProjectDto(Projects project)
         {
-            QuickLinks = new List<QuickLinks>();
+            QuickLinks = new List<QuickLinkShortDto>();
 
             if (project != null) {
                 ProjectId = project.ProjectId;
@@ -24,7 +24,7 @@ namespace kms.Models
                 IsActive = project.IsActive;
 
                 if (project.QuickLinksHousingProject != null && project.QuickLinksHousingProject.Count > 0) {
-                    QuickLinks = project.QuickLinksHousingProject.Where(q => q != null).Select(q => q);
+                    QuickLinks = project.QuickLinksHousingProject.Where(q => q != null).Select(q => new QuickLinkShortDto(q));
                 }
             }
         }
@@ -38,6 +38,6 @@ namespace kms.Models
         public string Avatar { get; set; }
         public bool IsOpen { get; set; }
         public bool IsActive { get; set; }
-        public IEnumerable<QuickLinks> QuickLinks { get; set; }
+        public IEnumerable<QuickLinkShortDto> QuickLinks { get; set; }
     }
 }

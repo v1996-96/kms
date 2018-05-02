@@ -10,10 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using kms.Utils;
 
 namespace kms.Controllers
 {
-    [Route("api/[controller]"), Authorize]
+    [KmsController, Authorize]
     public class UsersController : Controller
     {
         private int UserId { get { return int.Parse(User.Identity.Name); } }

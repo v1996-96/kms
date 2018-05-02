@@ -8,10 +8,11 @@ using kms.Models;
 using kms.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using kms.Utils;
 
 namespace kms.Controllers
 {
-    [Route("api/[controller]"), Authorize]
+    [KmsController, Authorize]
     public class ProfileController : Controller
     {
         private readonly IUserRepository _userRepository;

@@ -25,7 +25,7 @@
             "label": "scaffold",
             "problemMatcher": "$msCompile",
             "type": "shell",
-            "command": "dotnet ef dbcontext scaffold 'Host=localhost;Port=32772;Database=kms;Username=postgres;Password=' Npgsql.EntityFrameworkCore.PostgreSQL --context KMSDBContext --force --output-dir Data/Entities"
+            "command": "dotnet ef dbcontext scaffold 'Host=localhost;Port=32768;Database=kms;Username=postgres;Password=' Npgsql.EntityFrameworkCore.PostgreSQL --context KMSDBContext --force --output-dir Data/Entities"
         }
     ]
 }

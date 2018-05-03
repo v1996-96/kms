@@ -3,9 +3,9 @@ using kms.Data.Entities;
 
 namespace kms.Models
 {
-    public class DocumentShortDto
+    public class DocumentDto
     {
-        public DocumentShortDto(Documents document)
+        public DocumentDto(Documents document, string content = "")
         {
             if (document != null) {
                 DocumentId = document.DocumentId;
@@ -17,7 +17,13 @@ namespace kms.Models
                 Subtitle = document.Subtitle;
                 DateCreated = document.DateCreated;
                 IsDraft = document.IsDraft;
+
+                if (document.Creator != null) {
+                    Creator = new UserShortDto(document.Creator);
+                }
             }
+
+            Content = content;
         }
         public int DocumentId { get; set; }
         public int? ParentDocumentId { get; set; }
@@ -26,7 +32,9 @@ namespace kms.Models
         public string Slug { get; set; }
         public string Title { get; set; }
         public string Subtitle { get; set; }
+        public string Content { get; set; }
         public DateTime DateCreated { get; set; }
         public bool IsDraft { get; set; }
+        public UserShortDto Creator { get; set; }
     }
 }

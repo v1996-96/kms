@@ -60,7 +60,7 @@ namespace kms.Controllers
             }
 
             int attemptsCount = 0;
-            int maxAttemptsCount = 10;
+            int maxAttemptsCount = 100;
             string slug;
             bool isSlugUnique = false;
 

@@ -267,7 +267,7 @@ namespace kms.Controllers
         [HttpGet("{projectId:int}/team")]
         [HttpGet("{slug:regex([[\\w-]])}/team")]
         public async Task<IActionResult> GetTeam([FromRoute] int? projectId, [FromRoute] string slug, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            IQueryable<ProjectTeam> teamQuery = _db.ProjectTeam.Include(t => t.ProjectRole);
+            IQueryable<ProjectTeam> teamQuery = _db.ProjectTeam.Include(t => t.ProjectRole).Include(t => t.User);
 
             if (projectId.HasValue) {
                 teamQuery = teamQuery.Where(t => t.ProjectId == projectId.Value);
@@ -304,6 +304,11 @@ namespace kms.Controllers
                 return NotFound();
             }
 
+            var existingMember = await _db.ProjectTeam.SingleOrDefaultAsync(t => t.UserId == member.UserId && t.ProjectId == project.ProjectId);
+            if (existingMember != null) {
+                throw new Exception("User is already in project team");
+            }
+
             var newMember = new ProjectTeam{
                 UserId = member.UserId,
                 ProjectId = project.ProjectId,
@@ -314,6 +319,7 @@ namespace kms.Controllers
             _db.ProjectTeam.Add(newMember);
             await _db.SaveChangesAsync();
             await _db.Entry(newMember).Reference(t => t.ProjectRole).LoadAsync();
+            await _db.Entry(newMember).Reference(t => t.User).LoadAsync();
 
             return Ok(new ProjectTeamDto(newMember));
         }
@@ -339,7 +345,7 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            var member = await _db.ProjectTeam.Include(t => t.ProjectRole).SingleOrDefaultAsync(t => t.UserId == updatedMember.UserId && t.ProjectId == project.ProjectId);
+            var member = await _db.ProjectTeam.Include(t => t.ProjectRole).Include(t => t.User).SingleOrDefaultAsync(t => t.UserId == updatedMember.UserId && t.ProjectId == project.ProjectId);
             if (member == null) {
                 return NotFound();
             }
@@ -389,47 +395,99 @@ namespace kms.Controllers
         [HttpGet("{projectId:int}/quick-links")]
         [HttpGet("{slug:regex([[\\w-]])}/quick-links")]
         public async Task<IActionResult> GetQuickLinks([FromRoute] int? projectId, [FromRoute] string slug, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            // IQueryable<QuickLinks> quickLinksQuery = _db.QuickLinks;
+            var project = await GetProject(projectId, slug);
+            if (project == null) {
+                return NotFound();
+            }
 
-            // IQueryable<ProjectTeam> teamQuery = _db.ProjectTeam.Include(t => t.ProjectRole);
-
-            // if (projectId.HasValue) {
-            //     teamQuery = teamQuery.Where(t => t.ProjectId == projectId.Value);
-            // } else {
-            //     teamQuery = teamQuery.Include(t => t.Project).Where(t => t.Project.Slug == slug);
-            // }
-
-            // teamQuery = teamQuery.OrderByDescending(t => t.DateJoined);
-
-            // var count = await teamQuery.CountAsync();
-            // var team = await teamQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
-            // var results = team.Select(t => new ProjectTeamDto(t));
-            // return Ok(new { count, results });
-
-            return Ok();
+            var quickLinksQuery = _db.QuickLinks.Include(q => q.Document).Include(q => q.Project).Where(q => q.HousingProjectId == project.ProjectId && q.UserId == UserId).OrderByDescending(q => q.QuickLinkId);
+            var count = await quickLinksQuery.CountAsync();
+            var quickLinks = await quickLinksQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
+            var results = quickLinks.Select(q => new QuickLinkShortDto(q));
+            return Ok(new { count, results });
         }
 
         [HttpPost("{projectId:int}/quick-links")]
         [HttpPost("{slug:regex([[\\w-]])}/quick-links")]
-        public async Task<IActionResult> CreateQuickLink() {
-            return Ok();
+        public async Task<IActionResult> CreateQuickLink([FromRoute] int? projectId, [FromRoute] string slug, [FromBody] QuickLinkCreateDto quickLink) {
+            if (quickLink == null) {
+                return BadRequest();
+            }
+
+            var project = await GetProject(projectId, slug);
+            if (project == null) {
+                return NotFound();
+            }
+
+            var newQuickLink = new QuickLinks{
+                HousingProjectId = project.ProjectId,
+                Name = quickLink.Name,
+                ProjectId = quickLink.ProjectId,
+                DocumentId = quickLink.DocumentId,
+                UserId = UserId,
+                ExternalLink = quickLink.ExternalLink
+            };
+
+            _db.QuickLinks.Add(newQuickLink);
+            await _db.SaveChangesAsync();
+            await _db.Entry(newQuickLink).Reference(q => q.Document).LoadAsync();
+            await _db.Entry(newQuickLink).Reference(q => q.Project).LoadAsync();
+            return Ok(new QuickLinkShortDto(newQuickLink));
         }
 
         [HttpPut("{projectId:int}/quick-links/{linkId:int}")]
         [HttpPut("{slug:regex([[\\w-]])}/quick-links/{linkId:int}")]
-        public async Task<IActionResult> UpdateQuickLink() {
-            return Ok();
+        public async Task<IActionResult> UpdateQuickLink([FromRoute] int? projectId, [FromRoute] string slug, [FromRoute] int linkId, [FromBody] QuickLinkShortDto quickLink) {
+            var project = await GetProject(projectId, slug);
+            if (project == null) {
+                return NotFound();
+            }
+
+            var dbQuickLink = await _db.QuickLinks.Include(q => q.Project).Include(q => q.Document).SingleOrDefaultAsync(q => q.QuickLinkId == linkId);
+            if (dbQuickLink == null) {
+                return NotFound();
+            }
+
+            dbQuickLink.Name = quickLink.Name;
+            dbQuickLink.ProjectId = quickLink.ProjectId;
+            dbQuickLink.DocumentId = quickLink.DocumentId;
+            dbQuickLink.ExternalLink = quickLink.ExternalLink;
+
+            await _db.SaveChangesAsync();
+            await _db.Entry(dbQuickLink).Reference(q => q.Document).LoadAsync();
+            await _db.Entry(dbQuickLink).Reference(q => q.Project).LoadAsync();
+
+            return Ok(new QuickLinkShortDto(dbQuickLink));
         }
 
         [HttpDelete("{projectId:int}/quick-links/{linkId:int}")]
         [HttpDelete("{slug:regex([[\\w-]])}/quick-links/{linkId:int}")]
-        public async Task<IActionResult> DeleteQuickLink() {
+        public async Task<IActionResult> DeleteQuickLink([FromRoute] int? projectId, [FromRoute] string slug, [FromRoute] int linkId) {
+            var project = await GetProject(projectId, slug);
+            if (project == null) {
+                return NotFound();
+            }
+
+            var quickLink = await _db.QuickLinks.SingleOrDefaultAsync(q => q.QuickLinkId == linkId);
+            if (quickLink == null) {
+                return NotFound();
+            }
+
+            _db.QuickLinks.Remove(quickLink);
+            await _db.SaveChangesAsync();
             return Ok();
         }
 
         [HttpDelete("{projectId:int}/quick-links")]
         [HttpDelete("{slug:regex([[\\w-]])}/quick-links")]
-        public async Task<IActionResult> DeleteQuickLinks() {
+        public async Task<IActionResult> DeleteQuickLinks([FromRoute] int? projectId, [FromRoute] string slug, [FromQuery] int[] ids) {
+            var project = await GetProject(projectId, slug);
+            if (project == null) {
+                return NotFound();
+            }
+
+            _db.QuickLinks.RemoveRange(_db.QuickLinks.Where(q => ids.Contains(q.QuickLinkId) && q.HousingProjectId == project.ProjectId));
+            await _db.SaveChangesAsync();
             return Ok();
         }
         #endregion

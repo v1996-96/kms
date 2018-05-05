@@ -112,7 +112,26 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            project.Name = updatedProject.Name;
+            if (project.Name != updatedProject.Name) {
+                int attemptsCount = 0;
+                int maxAttemptsCount = 100;
+                string newSlug;
+                bool isSlugUnique = false;
+
+                do {
+                    newSlug = updatedProject.Name.GenerateSlug();
+                    isSlugUnique = (await _db.Projects.SingleOrDefaultAsync(p => p.Slug == newSlug)) == null;
+                } while (!isSlugUnique && attemptsCount < maxAttemptsCount);
+
+                if (!isSlugUnique) {
+                    return BadRequest(new { message = "Cannot generate unique slug" });
+                }
+
+                project.Name = updatedProject.Name;
+                project.Slug = newSlug;
+            }
+
+
             project.Description = updatedProject.Description;
             project.Goal = updatedProject.Goal;
             project.DateStart = updatedProject.DateStart;

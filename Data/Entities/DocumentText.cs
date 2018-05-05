@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NpgsqlTypes;
 
 namespace kms.Data.Entities
 {
@@ -12,6 +13,7 @@ namespace kms.Data.Entities
         public string QuillDelta { get; set; }
         public DateTime? TimeUpdated { get; set; }
         public bool IsActual { get; set; }
+        public NpgsqlTsVector ContentVector { get; set; }
 
         public Documents Document { get; set; }
         public Users Editor { get; set; }

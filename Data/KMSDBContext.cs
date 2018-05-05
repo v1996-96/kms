@@ -1,9 +1,8 @@
 ﻿using System;
-using kms.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace kms.Data
+namespace kms.Data.Entities
 {
     public partial class KMSDBContext : DbContext
     {
@@ -160,9 +159,7 @@ namespace kms.Data
 
                 entity.ToTable("comments");
 
-                entity.Property(e => e.CommentId)
-                    .HasColumnName("comment_id")
-                    .ValueGeneratedNever();
+                entity.Property(e => e.CommentId).HasColumnName("comment_id");
 
                 entity.Property(e => e.Content).HasColumnName("content");
 
@@ -274,9 +271,15 @@ namespace kms.Data
             {
                 entity.ToTable("document_text");
 
+                entity.HasIndex(e => e.ContentVector)
+                    .HasName("content_vector_index")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.Property(e => e.DocumentTextId).HasColumnName("document_text_id");
 
                 entity.Property(e => e.Content).HasColumnName("content");
+
+                entity.Property(e => e.ContentVector).HasColumnName("content_vector");
 
                 entity.Property(e => e.DocumentId).HasColumnName("document_id");
 
@@ -819,6 +822,8 @@ namespace kms.Data
 
                 entity.Property(e => e.Surname).HasColumnName("surname");
             });
+
+            modelBuilder.HasSequence("comments_comment_id_seq").HasMax(2147483647);
         }
     }
 }

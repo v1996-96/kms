@@ -71,6 +71,8 @@ namespace kms
 
             // Services
             services.AddSingleton<IJwtHandlerService, JwtHandlerService>();
+            services.AddSingleton<IMd5HashService, Md5HashService>();
+            services.AddSingleton<IAssetsService, AssetsService>();
             services.AddSingleton<IPasswordHasher<Users>, PasswordHasher<Users>>();
 
             var CorsConfig = Configuration.GetSection("CORS");

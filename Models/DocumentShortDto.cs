@@ -5,7 +5,7 @@ namespace kms.Models
 {
     public class DocumentShortDto
     {
-        public DocumentShortDto(Documents document)
+        public DocumentShortDto(Documents document, int likesCount = 0)
         {
             if (document != null) {
                 DocumentId = document.DocumentId;
@@ -18,6 +18,8 @@ namespace kms.Models
                 DateCreated = document.DateCreated;
                 IsDraft = document.IsDraft;
             }
+
+            LikesCount = likesCount;
         }
         public int DocumentId { get; set; }
         public int? ParentDocumentId { get; set; }
@@ -28,5 +30,6 @@ namespace kms.Models
         public string Subtitle { get; set; }
         public DateTime DateCreated { get; set; }
         public bool IsDraft { get; set; }
+        public int LikesCount { get; set; }
     }
 }

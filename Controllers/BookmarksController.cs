@@ -17,19 +17,24 @@ namespace kms.Controllers
     public class BookmarksController : Controller
     {
         private int UserId { get { return int.Parse(User.Identity.Name); } }
-
+        private readonly ISearchRepository _search;
         private readonly KMSDBContext _db;
-        public BookmarksController(KMSDBContext context)
+        public BookmarksController(KMSDBContext context, ISearchRepository search)
         {
+            this._search = search;
             this._db = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            var bookmarksQuery = _db.Bookmarks
-                .Include(b => b.Document)
-                .Where(b => b.UserId == UserId)
-                .OrderByDescending(b => b.TimeCreated);
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
+        {
+            IQueryable<Bookmarks> bookmarksQuery = _db.Bookmarks.Include(b => b.Document).Where(b => b.UserId == UserId);
+
+            if (query.IsValidQuery()) {
+                bookmarksQuery = _search.SearchBookmarks(bookmarksQuery, query);
+            } else {
+                bookmarksQuery = bookmarksQuery.OrderByDescending(b => b.TimeCreated);
+            }
 
             var count = await bookmarksQuery.CountAsync();
             var bookmarks = await bookmarksQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
@@ -39,18 +44,22 @@ namespace kms.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] BookmarkCreateDto bookmark) {
-            if (bookmark == null) {
+        public async Task<IActionResult> Create([FromBody] BookmarkCreateDto bookmark)
+        {
+            if (bookmark == null)
+            {
                 return BadRequest();
             }
 
             var document = await _db.Documents.SingleOrDefaultAsync(d => d.DocumentId == bookmark.DocumentId);
-            if (document == null) {
+            if (document == null)
+            {
                 return NotFound();
             }
 
             var existingBookmark = await _db.Bookmarks.Include(b => b.Document).SingleOrDefaultAsync(b => b.DocumentId == bookmark.DocumentId && b.UserId == UserId);
-            if (existingBookmark != null) {
+            if (existingBookmark != null)
+            {
                 return Ok(new BookmarkDto(existingBookmark));
             }
 
@@ -63,10 +72,12 @@ namespace kms.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete([FromRoute] int id) {
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
             var bookmark = await _db.Bookmarks.SingleOrDefaultAsync(b => b.BookmarkId == id);
 
-            if (bookmark == null) {
+            if (bookmark == null)
+            {
                 return NotFound();
             }
 

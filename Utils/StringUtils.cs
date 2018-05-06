@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace kms.Utils
 {
-    public static class SlugUtil
+    public static class StringUtils
     {
         private const string SEPARATOR = "-";
         private const int LENGTH = 50;
@@ -30,5 +30,7 @@ namespace kms.Utils
 
             return s.Normalize(NormalizationForm.FormC);
         }
+
+        public static bool IsValidQuery(this string query) => query != null && query != "";
     }
 }

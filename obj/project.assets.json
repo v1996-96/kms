@@ -13628,6 +13628,7 @@
       "Humanizer >= 2.2.0",
       "Microsoft.AspNetCore.All >= 2.0.6",
       "Microsoft.EntityFrameworkCore.Design >= 2.0.2",
+      "Microsoft.Extensions.Logging.Console >= 2.0.1",
       "Microsoft.NETCore.App >= 2.0.0",
       "Npgsql >= 3.2.7",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 2.0.2",
@@ -13694,6 +13695,10 @@
           "Microsoft.EntityFrameworkCore.Design": {
             "target": "Package",
             "version": "[2.0.2, )"
+          },
+          "Microsoft.Extensions.Logging.Console": {
+            "target": "Package",
+            "version": "[2.0.1, )"
           },
           "Microsoft.NETCore.App": {
             "target": "Package",

@@ -19,11 +19,13 @@ namespace kms.Controllers
     {
         private int UserId { get { return int.Parse(User.Identity.Name); } }
         private readonly IAssetsService _assets;
+        private readonly ISearchRepository _search;
         private readonly KMSDBContext _db;
         private const string ATTACHMENTS_DIRNAME = "attachments";
-        public DocumentsController(KMSDBContext context, IAssetsService assets)
+        public DocumentsController(KMSDBContext context, IAssetsService assets, ISearchRepository search)
         {
             this._assets = assets;
+            this._search = search;
             this._db = context;
         }
 
@@ -65,18 +67,12 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            var texts = await _db.DocumentText.Where(t => t.DocumentId == document.DocumentId).ToListAsync();
-            foreach (var item in texts) {
-                item.IsActual = false;
-            }
-
             var newText = new DocumentText{
                 DocumentId = document.DocumentId,
                 EditorId = UserId,
                 Content = changes.Content,
                 QuillDelta = changes.QuillDelta,
-                TimeUpdated = DateTime.UtcNow,
-                IsActual = true
+                TimeUpdated = DateTime.UtcNow
             };
             _db.DocumentText.Add(newText);
             await _db.SaveChangesAsync();
@@ -91,23 +87,23 @@ namespace kms.Controllers
         {
             IQueryable<Documents> documentsQuery = _db.Documents;
 
-            if (project.HasValue)
-            {
+            if (project.HasValue) {
                 // If project specified, retrieve documents for project
                 documentsQuery = documentsQuery.Where(d => d.ProjectId == project);
-            }
-            else
-            {
+            } else {
                 // By default retrieve user's documents
                 documentsQuery = documentsQuery.Where(d => d.CreatorId == UserId);
             }
 
-            if (isDraft.HasValue)
-            {
+            if (isDraft.HasValue) {
                 documentsQuery = documentsQuery.Where(d => d.IsDraft == isDraft.Value);
             }
 
-            documentsQuery.OrderByDescending(d => d.DateCreated);
+            if (query.IsValidQuery()) {
+                documentsQuery = _search.SearchDocuments(documentsQuery, query);
+            } else {
+                documentsQuery = documentsQuery.OrderByDescending(d => d.DateCreated);
+            }
 
             var count = await documentsQuery.CountAsync();
             var results = await documentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Include(d => d.DocumentLikes).Select(d => new DocumentShortDto(d, d.DocumentLikes.Count())).ToListAsync();

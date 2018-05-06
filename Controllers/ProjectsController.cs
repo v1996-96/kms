@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using kms.Utils;
+using System.Data.SqlClient;
+using Npgsql;
 
 namespace kms.Controllers
 {
@@ -19,22 +21,29 @@ namespace kms.Controllers
         private int UserId { get { return int.Parse(User.Identity.Name); } }
 
         private readonly KMSDBContext _db;
-        public ProjectsController(KMSDBContext context)
+        private readonly ISearchRepository _search;
+
+        public ProjectsController(KMSDBContext context, ISearchRepository search)
         {
             this._db = context;
+            this._search = search;
         }
 
         #region CRUD
 
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] int? user, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            IQueryable<Projects> projectsQuery = _db.Projects;
+            IQueryable<Projects> projectsQuery;
+
+            if (query.IsValidQuery()) {
+                projectsQuery = _search.SearchProjects(query);
+            } else {
+                projectsQuery = _db.Projects.OrderByDescending(p => p.ProjectId);
+            }
 
             if (user.HasValue) {
                 projectsQuery = projectsQuery.Include(p => p.ProjectTeam).Where(p => p.ProjectTeam.Any(pt => pt.UserId == user.Value));
             }
-
-            projectsQuery = projectsQuery.OrderByDescending(p => p.ProjectId);
 
             var count = await projectsQuery.CountAsync();
             var projects = await projectsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
@@ -294,7 +303,11 @@ namespace kms.Controllers
                 teamQuery = teamQuery.Include(t => t.Project).Where(t => t.Project.Slug == slug);
             }
 
-            teamQuery = teamQuery.OrderByDescending(t => t.DateJoined);
+            if (query.IsValidQuery()) {
+                teamQuery = _search.SearchProjectTeam(teamQuery, query);
+            } else {
+                teamQuery = teamQuery.OrderByDescending(t => t.DateJoined);
+            }
 
             var count = await teamQuery.CountAsync();
             var team = await teamQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
@@ -419,7 +432,14 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            var quickLinksQuery = _db.QuickLinks.Include(q => q.Document).Include(q => q.Project).Where(q => q.HousingProjectId == project.ProjectId && q.UserId == UserId).OrderByDescending(q => q.QuickLinkId);
+            var quickLinksQuery = _db.QuickLinks.Include(q => q.Document).Include(q => q.Project).Where(q => q.HousingProjectId == project.ProjectId && q.UserId == UserId);
+
+            if (query.IsValidQuery()) {
+                quickLinksQuery = _search.SearchQuickLinks(quickLinksQuery, query);
+            } else {
+                quickLinksQuery = quickLinksQuery.OrderByDescending(q => q.QuickLinkId);
+            }
+
             var count = await quickLinksQuery.CountAsync();
             var quickLinks = await quickLinksQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
             var results = quickLinks.Select(q => new QuickLinkShortDto(q));

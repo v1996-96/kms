@@ -20,16 +20,25 @@ namespace kms.Controllers
         private int UserId { get { return int.Parse(User.Identity.Name); } }
         private readonly KMSDBContext _db;
         private readonly IPasswordHasher<Users> _passwordHasher;
+        private readonly ISearchRepository _search;
 
-        public UsersController(KMSDBContext context, IPasswordHasher<Users> passwordHasher)
+        public UsersController(KMSDBContext context, IPasswordHasher<Users> passwordHasher, ISearchRepository search)
         {
             this._db = context;
             this._passwordHasher = passwordHasher;
+            this._search = search;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList(int? offset, int? limit) {
-            var usersQuery =  _db.Users.OrderByDescending(u => u.UserId);
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
+            IQueryable<Users> usersQuery;
+
+            if (query.IsValidQuery()) {
+                usersQuery = _search.SearchUsers(query);
+            } else {
+                usersQuery = _db.Users.OrderByDescending(u => u.UserId);
+            }
+
             var count = await usersQuery.CountAsync();
             var users = await usersQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
             var results = users.Select(u => new UserShortDto(u));

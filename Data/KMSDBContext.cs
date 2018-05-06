@@ -40,6 +40,9 @@ namespace kms.Data.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("pg_trgm")
+                .HasPostgresExtension("unaccent");
+
             modelBuilder.Entity<Activity>(entity =>
             {
                 entity.ToTable("activity");
@@ -159,6 +162,10 @@ namespace kms.Data.Entities
 
                 entity.ToTable("comments");
 
+                entity.HasIndex(e => e.Content)
+                    .HasName("comment_content_idx")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.Property(e => e.CommentId).HasColumnName("comment_id");
 
                 entity.Property(e => e.Content).HasColumnName("content");
@@ -186,6 +193,10 @@ namespace kms.Data.Entities
                 entity.HasKey(e => e.CompetenceId);
 
                 entity.ToTable("competences");
+
+                entity.HasIndex(e => e.Name)
+                    .HasName("competence_name_idx")
+                    .ForNpgsqlHasMethod("gin");
 
                 entity.Property(e => e.CompetenceId).HasColumnName("competence_id");
 
@@ -225,6 +236,10 @@ namespace kms.Data.Entities
 
                 entity.ToTable("documents");
 
+                entity.HasIndex(e => e.DocumentTsv)
+                    .HasName("document_searching_idx")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.HasIndex(e => e.Slug)
                     .HasName("document_slug")
                     .IsUnique();
@@ -234,6 +249,8 @@ namespace kms.Data.Entities
                 entity.Property(e => e.CreatorId).HasColumnName("creator_id");
 
                 entity.Property(e => e.DateCreated).HasColumnName("date_created");
+
+                entity.Property(e => e.DocumentTsv).HasColumnName("document_tsv");
 
                 entity.Property(e => e.IsDraft).HasColumnName("is_draft");
 
@@ -271,15 +288,9 @@ namespace kms.Data.Entities
             {
                 entity.ToTable("document_text");
 
-                entity.HasIndex(e => e.ContentVector)
-                    .HasName("content_vector_index")
-                    .ForNpgsqlHasMethod("gin");
-
                 entity.Property(e => e.DocumentTextId).HasColumnName("document_text_id");
 
                 entity.Property(e => e.Content).HasColumnName("content");
-
-                entity.Property(e => e.ContentVector).HasColumnName("content_vector");
 
                 entity.Property(e => e.DocumentId).HasColumnName("document_id");
 
@@ -484,6 +495,10 @@ namespace kms.Data.Entities
 
                 entity.ToTable("projects");
 
+                entity.HasIndex(e => e.Name)
+                    .HasName("projects_name_idx")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.HasIndex(e => e.Slug)
                     .HasName("project_slug")
                     .IsUnique();
@@ -555,6 +570,10 @@ namespace kms.Data.Entities
                 entity.HasKey(e => e.QuickLinkId);
 
                 entity.ToTable("quick_links");
+
+                entity.HasIndex(e => e.Name)
+                    .HasName("quick_link_name_idx")
+                    .ForNpgsqlHasMethod("gin");
 
                 entity.Property(e => e.QuickLinkId).HasColumnName("quick_link_id");
 
@@ -664,6 +683,10 @@ namespace kms.Data.Entities
                     .HasName("template_slug")
                     .IsUnique();
 
+                entity.HasIndex(e => e.TemplateTsv)
+                    .HasName("template_searching_idx")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.Property(e => e.TemplateId).HasColumnName("template_id");
 
                 entity.Property(e => e.CreatorId).HasColumnName("creator_id");
@@ -677,6 +700,8 @@ namespace kms.Data.Entities
                 entity.Property(e => e.Slug)
                     .IsRequired()
                     .HasColumnName("slug");
+
+                entity.Property(e => e.TemplateTsv).HasColumnName("template_tsv");
 
                 entity.Property(e => e.TemplateTypeSlug)
                     .IsRequired()
@@ -802,6 +827,18 @@ namespace kms.Data.Entities
 
                 entity.ToTable("users");
 
+                entity.HasIndex(e => e.Email)
+                    .HasName("user_email")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Name)
+                    .HasName("user_name_idx")
+                    .ForNpgsqlHasMethod("gin");
+
+                entity.HasIndex(e => e.Surname)
+                    .HasName("user_surname_idx")
+                    .ForNpgsqlHasMethod("gin");
+
                 entity.Property(e => e.UserId).HasColumnName("user_id");
 
                 entity.Property(e => e.Avatar)
@@ -822,8 +859,6 @@ namespace kms.Data.Entities
 
                 entity.Property(e => e.Surname).HasColumnName("surname");
             });
-
-            modelBuilder.HasSequence("comments_comment_id_seq").HasMax(2147483647);
         }
     }
 }

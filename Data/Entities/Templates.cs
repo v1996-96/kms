@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NpgsqlTypes;
 
 namespace kms.Data.Entities
 {
@@ -18,6 +19,7 @@ namespace kms.Data.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateCreated { get; set; }
+        public NpgsqlTsVector TemplateTsv { get; set; }
 
         public Users Creator { get; set; }
         public Projects Project { get; set; }

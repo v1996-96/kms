@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
@@ -26,6 +27,7 @@ namespace kms
     {
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment { get; }
+        public static readonly LoggerFactory MyLoggerFactory = new LoggerFactory(new[] {new ConsoleLoggerProvider((_, __) => true, true)});
 
         public Startup(IHostingEnvironment env)
         {
@@ -43,7 +45,7 @@ namespace kms
         public void ConfigureServices(IServiceCollection services)
         {
             string connectionString = Configuration.GetConnectionString("KMSDBConnection");
-            services.AddDbContext<KMSDBContext>(options => options.UseNpgsql(connectionString));
+            services.AddDbContext<KMSDBContext>(options => options.UseLoggerFactory(MyLoggerFactory).UseNpgsql(connectionString));
 
             services.AddSingleton<IConfiguration>(Configuration);
 
@@ -68,6 +70,7 @@ namespace kms
             // Data repositories
             services.AddTransient<IAccountRepository, AccountRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<ISearchRepository, SearchRepository>();
 
             // Services
             services.AddSingleton<IJwtHandlerService, JwtHandlerService>();

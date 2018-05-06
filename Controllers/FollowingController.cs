@@ -17,19 +17,24 @@ namespace kms.Controllers
     public class FollowingController : Controller
     {
         private int UserId { get { return int.Parse(User.Identity.Name); } }
-
+        private readonly ISearchRepository _search;
         private readonly KMSDBContext _db;
-        public FollowingController(KMSDBContext context)
+        public FollowingController(KMSDBContext context, ISearchRepository search)
         {
+            this._search = search;
             this._db = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            var followingQuery = _db.FollowedProjects
-                .Include(f => f.Project)
-                .Where(f => f.UserId == UserId)
-                .OrderByDescending(f => f.TimeCreated);
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
+        {
+            IQueryable<FollowedProjects> followingQuery = _db.FollowedProjects.Include(f => f.Project).Where(f => f.UserId == UserId);
+
+            if (query.IsValidQuery()) {
+                followingQuery = _search.SearchFollowedProjects(followingQuery, query);
+            } else {
+                followingQuery = followingQuery.OrderByDescending(f => f.TimeCreated);
+            }
 
             var count = await followingQuery.CountAsync();
             var following = await followingQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
@@ -39,18 +44,22 @@ namespace kms.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Follow([FromBody] FollowingCreateDto following) {
-            if (following == null) {
+        public async Task<IActionResult> Follow([FromBody] FollowingCreateDto following)
+        {
+            if (following == null)
+            {
                 return BadRequest();
             }
 
             var project = await _db.Projects.SingleOrDefaultAsync(p => p.ProjectId == following.ProjectId);
-            if (project == null) {
+            if (project == null)
+            {
                 return NotFound();
             }
 
             var existingFollowing = await _db.FollowedProjects.Include(f => f.Project).SingleOrDefaultAsync(f => f.ProjectId == following.ProjectId && f.UserId == UserId);
-            if (existingFollowing != null) {
+            if (existingFollowing != null)
+            {
                 return Ok(new FollowingDto(existingFollowing));
             }
 
@@ -63,10 +72,12 @@ namespace kms.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete([FromRoute] int id) {
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
             var following = await _db.FollowedProjects.SingleOrDefaultAsync(f => f.FollowedProjectsId == id);
 
-            if (following == null) {
+            if (following == null)
+            {
                 return NotFound();
             }
 

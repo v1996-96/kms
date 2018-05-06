@@ -19,14 +19,24 @@ namespace kms.Controllers
         private int UserId { get { return int.Parse(User.Identity.Name); } }
 
         private readonly KMSDBContext _db;
-        public CompetencesController(KMSDBContext context)
+        private readonly ISearchRepository _search;
+
+        public CompetencesController(KMSDBContext context, ISearchRepository search)
         {
             this._db = context;
+            this._search = search;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            var competencesQuery = _db.Competences.OrderByDescending(c => c.CompetenceId);
+            IQueryable<Competences> competencesQuery;
+
+            if (query.IsValidQuery()) {
+                competencesQuery = _search.SearchCompetences(query);
+            } else {
+                competencesQuery = _db.Competences.OrderByDescending(c => c.CompetenceId);
+            }
+
             var count = await competencesQuery.CountAsync();
             var following = await competencesQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
             var results = following.Select(c => new CompetenceDto(c));

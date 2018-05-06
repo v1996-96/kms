@@ -17,19 +17,24 @@ namespace kms.Controllers
     public class LastSeenController : Controller
     {
         private int UserId { get { return int.Parse(User.Identity.Name); } }
-
+        private readonly ISearchRepository _search;
         private readonly KMSDBContext _db;
-        public LastSeenController(KMSDBContext context)
+        public LastSeenController(KMSDBContext context, ISearchRepository search)
         {
+            this._search = search;
             this._db = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
-            var lastSeenQuery = _db.LastSeenDocuments
-                .Include(f => f.Document)
-                .Where(f => f.UserId == UserId)
-                .OrderByDescending(f => f.TimeCreated);
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
+        {
+            IQueryable<LastSeenDocuments> lastSeenQuery = _db.LastSeenDocuments.Include(f => f.Document).Where(f => f.UserId == UserId);
+
+            if (query.IsValidQuery()) {
+                lastSeenQuery = _search.SearchLastSeenDocuments(lastSeenQuery, query);
+            } else {
+                lastSeenQuery = lastSeenQuery.OrderByDescending(f => f.TimeCreated);
+            }
 
             var count = await lastSeenQuery.CountAsync();
             var following = await lastSeenQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
@@ -39,13 +44,16 @@ namespace kms.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> MarkSeen([FromBody] LastSeenCreateDto document) {
-            if (document == null) {
+        public async Task<IActionResult> MarkSeen([FromBody] LastSeenCreateDto document)
+        {
+            if (document == null)
+            {
                 return BadRequest();
             }
 
             var dbDocument = await _db.Documents.SingleOrDefaultAsync(d => d.DocumentId == document.DocumentId);
-            if (dbDocument == null) {
+            if (dbDocument == null)
+            {
                 return NotFound();
             }
 
@@ -58,7 +66,8 @@ namespace kms.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete() {
+        public async Task<IActionResult> Delete()
+        {
             var lastSeenDocumentsHistory = await _db.LastSeenDocuments.Where(l => l.UserId == UserId).ToListAsync();
             _db.LastSeenDocuments.RemoveRange(lastSeenDocumentsHistory);
             await _db.SaveChangesAsync();

@@ -773,6 +773,8 @@ namespace kms.Data.Entities
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnName("name");
+
+                entity.Property(e => e.System).HasColumnName("system");
             });
 
             modelBuilder.Entity<UserCompetences>(entity =>

@@ -173,8 +173,7 @@ namespace kms.Controllers
                 EditorId = UserId,
                 Content = document.Content,
                 QuillDelta = document.QuillDelta,
-                TimeUpdated = DateTime.UtcNow,
-                IsActual = true
+                TimeUpdated = DateTime.UtcNow
             };
             _db.DocumentText.Add(newDocumentText);
             await _db.SaveChangesAsync();

@@ -67,5 +67,12 @@ namespace kms.Repository
         public IQueryable<QuickLinks> SearchQuickLinks(string query) => SearchQuickLinks(_db.QuickLinks, query);
         public IQueryable<QuickLinks> SearchQuickLinks(IQueryable<QuickLinks> statement, string query)
             => statement.FromSql("select * from quick_links where name % {0} order by name <-> {0}", query);
+
+
+        public IQueryable<Templates> SearchTemplates(string query) => SearchTemplates(_db.Templates, query);
+        public IQueryable<Templates> SearchTemplates(IQueryable<Templates> statement, string query)
+            => statement.FromSql(@"select * from templates
+                where template_tsv @@ phraseto_tsquery(coalesce({0}, ''))
+                order by ts_rank(template_tsv, phraseto_tsquery(coalesce({0}, ''))) desc", query);
     }
 }

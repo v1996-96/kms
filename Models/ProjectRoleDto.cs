@@ -11,6 +11,7 @@ namespace kms.Models
             if (role != null) {
                 ProjectRoleId = role.ProjectRoleId;
                 Name = role.Name;
+                System = role.System;
 
                 if (role.ProjectRolePermissions != null) {
                     Permissions = role.ProjectRolePermissions.Where(rp => rp.ProjectPermissionSlugNavigation != null).Select(rp => new ProjectPermissionDto(rp.ProjectPermissionSlugNavigation));
@@ -19,6 +20,7 @@ namespace kms.Models
         }
         public int ProjectRoleId { get; set; }
         public string Name { get; set; }
+        public bool System { get; set; }
         public IEnumerable<ProjectPermissionDto> Permissions { get; set; }
     }
 }

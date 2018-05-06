@@ -31,5 +31,9 @@ namespace kms.Repository
 
         IQueryable<QuickLinks> SearchQuickLinks(string query);
         IQueryable<QuickLinks> SearchQuickLinks(IQueryable<QuickLinks> statement, string query);
+
+
+        IQueryable<Templates> SearchTemplates(string query);
+        IQueryable<Templates> SearchTemplates(IQueryable<Templates> statement, string query);
     }
 }

@@ -14,7 +14,7 @@ namespace kms.Models
                 this.Meta = activity.Meta;
 
                 if (activity.User != null) {
-                    this.Issuer = new ProfileShortDto(activity.User);
+                    this.Issuer = new UserShortDto(activity.User);
                 }
 
                 if (activity.Project != null) {
@@ -32,6 +32,6 @@ namespace kms.Models
         public string ProjectName { get; set; }
         public string ProjectSlug { get; set; }
         public int ProjectId { get; set; }
-        public ProfileShortDto Issuer { get; set; }
+        public UserShortDto Issuer { get; set; }
     }
 }

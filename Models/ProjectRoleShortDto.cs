@@ -9,9 +9,11 @@ namespace kms.Models
             if (role != null) {
                 ProjectRoleId = role.ProjectRoleId;
                 Name = role.Name;
+                System = role.System;
             }
         }
         public int ProjectRoleId { get; set; }
         public string Name { get; set; }
+        public bool System { get; set; }
     }
 }

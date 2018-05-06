@@ -13,7 +13,6 @@ namespace kms.Models
                 UserId = quickLink.UserId;
                 ExternalLink = quickLink.ExternalLink;
                 Name = quickLink.Name;
-                HousingProjectId = quickLink.HousingProjectId;
 
                 if (quickLink.Project != null) {
                     Project = new ProjectShortDto(quickLink.Project);
@@ -30,7 +29,6 @@ namespace kms.Models
         public int? UserId { get; set; }
         public string ExternalLink { get; set; }
         public string Name { get; set; }
-        public int? HousingProjectId { get; set; }
         public ProjectShortDto Project { get; set; }
         public DocumentShortDto Document { get; set; }
     }

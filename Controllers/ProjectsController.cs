@@ -32,7 +32,7 @@ namespace kms.Controllers
         #region CRUD
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? user, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
+        public async Task<IActionResult> GetList([FromQuery] int? user, [FromQuery] bool? my, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
             IQueryable<Projects> projectsQuery;
 
             if (query.IsValidQuery()) {
@@ -43,11 +43,12 @@ namespace kms.Controllers
 
             if (user.HasValue) {
                 projectsQuery = projectsQuery.Include(p => p.ProjectTeam).Where(p => p.ProjectTeam.Any(pt => pt.UserId == user.Value));
+            } else if (my.HasValue && my.Value) {
+                projectsQuery = projectsQuery.Include(p => p.ProjectTeam).Where(p => p.ProjectTeam.Any(pt => pt.UserId == UserId));
             }
 
             var count = await projectsQuery.CountAsync();
-            var projects = await projectsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
-            var results = projects.Select(p => new ProjectShortDto(p));
+            var results = await projectsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Include(p => p.ProjectTeam).Select(p => new ProjectShortDto(p, p.ProjectTeam.Count())).ToListAsync();
             return Ok(new { count, results });
         }
 
@@ -59,7 +60,9 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            return Ok(new ProjectDto(project));
+            var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == project.ProjectId).CountAsync();
+
+            return Ok(new ProjectDto(project, membersCount));
         }
 
         [HttpPost]
@@ -97,8 +100,9 @@ namespace kms.Controllers
             _db.Projects.Add(newProject);
             await _db.SaveChangesAsync();
             await _db.Entry(newProject).Collection(b => b.QuickLinksHousingProject).LoadAsync();
+            var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == newProject.ProjectId).CountAsync();
 
-            return Ok(new ProjectDto(newProject));
+            return Ok(new ProjectDto(newProject, membersCount));
         }
 
         [HttpPut("{id:int}")]
@@ -150,8 +154,9 @@ namespace kms.Controllers
             project.IsActive = updatedProject.IsActive;
 
             await _db.SaveChangesAsync();
+            var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == project.ProjectId).CountAsync();
 
-            return Ok(new ProjectDto(project));
+            return Ok(new ProjectDto(project, membersCount));
         }
 
         [HttpDelete("{id:int}")]

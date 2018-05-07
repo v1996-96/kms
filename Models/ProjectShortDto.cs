@@ -5,7 +5,7 @@ namespace kms.Models
 {
     public class ProjectShortDto
     {
-        public ProjectShortDto(Projects project)
+        public ProjectShortDto(Projects project, int membersCount = 0)
         {
             if (project != null) {
                 ProjectId = project.ProjectId;
@@ -19,6 +19,8 @@ namespace kms.Models
                 IsOpen = project.IsOpen;
                 IsActive = project.IsActive;
             }
+
+            MembersCount = membersCount;
         }
         public int ProjectId { get; set; }
         public string Slug { get; set; }
@@ -30,5 +32,6 @@ namespace kms.Models
         public string Avatar { get; set; }
         public bool IsOpen { get; set; }
         public bool IsActive { get; set; }
+        public int MembersCount { get; set; }
     }
 }

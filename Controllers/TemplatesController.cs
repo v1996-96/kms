@@ -35,9 +35,13 @@ namespace kms.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? project, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
+        public async Task<IActionResult> GetList([FromQuery] int? project, [FromQuery] string type, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
         {
             IQueryable<Templates> templatesQuery = _db.Templates;
+
+            if (type != null && type != "") {
+                templatesQuery = templatesQuery.Where(d => d.TemplateTypeSlug == type);
+            }
 
             if (project.HasValue) {
                 templatesQuery = templatesQuery.Where(d => d.ProjectId == project);
@@ -54,6 +58,18 @@ namespace kms.Controllers
             var count = await templatesQuery.CountAsync();
             var results = await templatesQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Select(d => new TemplateShortDto(d)).ToListAsync();
             return Ok(new { count, results });
+        }
+
+        [HttpGet("type/{slug:regex([[\\w-]])}")]
+        public async Task<IActionResult> GetSingleByType([FromRoute] string slug) {
+            var template = await _db.Templates.Include(t => t.Creator).SingleOrDefaultAsync(t => t.TemplateTypeSlug == slug);
+            if (template == null) {
+                return NotFound();
+            }
+
+            var templateText = await _db.TemplateText.SingleOrDefaultAsync(t => t.TemplateId == template.TemplateId && t.IsActual);
+            var content = templateText == null ? "" : templateText.Content;
+            return Ok(new TemplateDto(template, content));
         }
 
         [HttpGet("{id:int}")]

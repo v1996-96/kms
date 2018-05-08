@@ -23,13 +23,14 @@ namespace kms.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList(int? offset, int? limit) {
-            var activitiesQuery = _db.Activity
-                .Include(a => a.Project)
-                    .ThenInclude(p => p.ProjectTeam)
-                .Include(a => a.User)
-                .Where(a => a.Project.ProjectTeam.All(pt => pt.UserId == UserId))
-                .OrderByDescending(a => a.TimeFired);
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] int? project) {
+            IQueryable<Activity> activitiesQuery = _db.Activity.Include(a => a.Project).ThenInclude(p => p.ProjectTeam).Include(a => a.User);
+
+            if (project.HasValue) {
+                activitiesQuery = activitiesQuery.Where(a => a.ProjectId == project.Value).OrderByDescending(a => a.TimeFired);
+            } else {
+                activitiesQuery = activitiesQuery.Where(a => a.Project.ProjectTeam.All(pt => pt.UserId == UserId)).OrderByDescending(a => a.TimeFired);
+            }
 
             var count = await activitiesQuery.CountAsync();
             var activities = await activitiesQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();

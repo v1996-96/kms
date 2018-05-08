@@ -43,6 +43,16 @@ namespace kms.Controllers
             return Ok(new { count, results });
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetByProject([FromRoute] int id) {
+            var following = await _db.FollowedProjects.Include(f => f.Project).SingleOrDefaultAsync(f => f.ProjectId == id && f.UserId == UserId);
+            if (following == null) {
+                return NotFound();
+            }
+
+            return Ok(new FollowingDto(following));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Follow([FromBody] FollowingCreateDto following)
         {

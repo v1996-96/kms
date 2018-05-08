@@ -39,7 +39,7 @@ namespace kms.Controllers
         public async Task<IActionResult> GetList([FromQuery] int? user, [FromQuery] bool? my, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
         {
             var sqlquery = @"select p.*,
-                (select count(distinct user_id) from project_team as pt where pt.project_id = p.project_id limit 1) as members_count
+                (select count(distinct ptt.user_id) from project_team as ptt where ptt.project_id = p.project_id limit 1) as MembersCount
                 from projects as p
                 left join project_team as pt on pt.project_id = p.project_id";
 

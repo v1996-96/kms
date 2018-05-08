@@ -61,8 +61,14 @@ namespace kms.Controllers
         }
 
         [HttpGet("type/{slug:regex([[\\w-]])}")]
-        public async Task<IActionResult> GetSingleByType([FromRoute] string slug) {
-            var template = await _db.Templates.Include(t => t.Creator).SingleOrDefaultAsync(t => t.TemplateTypeSlug == slug);
+        public async Task<IActionResult> GetSingleByType([FromRoute] string slug, [FromQuery] int? project) {
+            IQueryable<Templates> templateQuery = _db.Templates.Include(t => t.Creator);
+
+            if (project.HasValue) {
+                templateQuery = templateQuery.Where(t => t.ProjectId == project.Value);
+            }
+
+            var template = await templateQuery.SingleOrDefaultAsync(t => t.TemplateTypeSlug == slug);
             if (template == null) {
                 return NotFound();
             }

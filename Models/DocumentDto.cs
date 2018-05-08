@@ -21,6 +21,11 @@ namespace kms.Models
                 if (document.Creator != null) {
                     Creator = new UserShortDto(document.Creator);
                 }
+
+                if (document.Project != null) {
+                    ProjectName = document.Project.Name;
+                    ProjectSlug = document.Project.Slug;
+                }
             }
 
             Content = content;
@@ -28,7 +33,6 @@ namespace kms.Models
         }
         public int DocumentId { get; set; }
         public int? ParentDocumentId { get; set; }
-        public int ProjectId { get; set; }
         public int? CreatorId { get; set; }
         public string Slug { get; set; }
         public string Title { get; set; }
@@ -37,6 +41,9 @@ namespace kms.Models
         public DateTime DateCreated { get; set; }
         public bool IsDraft { get; set; }
         public int LikesCount { get; set; }
+        public int ProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public string ProjectSlug { get; set; }
         public UserShortDto Creator { get; set; }
     }
 }

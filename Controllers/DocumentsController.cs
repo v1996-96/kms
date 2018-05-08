@@ -106,7 +106,8 @@ namespace kms.Controllers
             }
 
             var count = await documentsQuery.CountAsync();
-            var results = await documentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Include(d => d.DocumentLikes).Select(d => new DocumentShortDto(d, d.DocumentLikes.Count())).ToListAsync();
+            var results = await documentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50)
+                .Include(d => d.DocumentLikes).Include(d => d.Project).Select(d => new DocumentShortDto(d, d.DocumentLikes.Count())).ToListAsync();
             return Ok(new { count, results });
         }
 
@@ -120,11 +121,7 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            var documentText = await _db.DocumentText.SingleOrDefaultAsync(t => t.DocumentId == document.DocumentId && t.IsActual);
-            var content = documentText == null ? "" : documentText.Content;
-            var likesCount = await _db.DocumentLikes.Where(l => l.DocumentId == document.DocumentId).CountAsync();
-
-            return Ok(new DocumentDto(document, content, likesCount));
+            return Ok(await PrepareDocument(document));
         }
 
         [HttpPost]
@@ -178,7 +175,7 @@ namespace kms.Controllers
             _db.DocumentText.Add(newDocumentText);
             await _db.SaveChangesAsync();
 
-            return Ok(new DocumentDto(newDocument, document.Content));
+            return Ok(await PrepareDocument(newDocument));
         }
 
         [HttpPut("{id:int}")]
@@ -224,12 +221,7 @@ namespace kms.Controllers
 
             await _db.SaveChangesAsync();
 
-            var documentText = await _db.DocumentText.SingleOrDefaultAsync(t => t.DocumentId == document.DocumentId && t.IsActual);
-            var content = documentText == null ? "" : documentText.Content;
-
-            var likesCount = await _db.DocumentLikes.Where(l => l.DocumentId == document.DocumentId).CountAsync();
-
-            return Ok(new DocumentDto(document, content, likesCount));
+            return Ok(await PrepareDocument(document));
         }
 
         [HttpDelete("{id:int}")]
@@ -510,7 +502,7 @@ namespace kms.Controllers
 
 
         private async Task<Documents> GetDocument(int? id, string slug) {
-            IQueryable<Documents> documentQuery = _db.Documents.Include(d => d.Creator);
+            IQueryable<Documents> documentQuery = _db.Documents.Include(d => d.Creator).Include(d => d.Project);
             Documents document;
 
             if (id.HasValue)
@@ -523,6 +515,13 @@ namespace kms.Controllers
             }
 
             return document;
+        }
+
+        private async Task<DocumentDto> PrepareDocument(Documents document) {
+            var documentText = await _db.DocumentText.SingleOrDefaultAsync(t => t.DocumentId == document.DocumentId && t.IsActual);
+            var content = documentText == null ? "" : documentText.Content;
+            var likesCount = await _db.DocumentLikes.Where(l => l.DocumentId == document.DocumentId).CountAsync();
+            return new DocumentDto(document, content, likesCount);
         }
     }
 }

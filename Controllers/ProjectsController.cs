@@ -99,6 +99,38 @@ namespace kms.Controllers
 
             _db.Projects.Add(newProject);
             await _db.SaveChangesAsync();
+
+            foreach (var member in project.Team)
+            {
+                if (member == null) {
+                    continue;
+                }
+
+                if (member.ProjectRole == null) {
+                    continue;
+                }
+
+                var role = await _db.ProjectRoles.SingleOrDefaultAsync(r => r.ProjectRoleId == member.ProjectRole.ProjectRoleId);
+                if (role == null) {
+                    continue;
+                }
+
+                var existingMember = await _db.ProjectTeam.SingleOrDefaultAsync(t => t.UserId == member.UserId && t.ProjectId == newProject.ProjectId);
+                if (existingMember != null) {
+                    continue;
+                }
+
+                var newMember = new ProjectTeam{
+                    UserId = member.UserId,
+                    ProjectId = newProject.ProjectId,
+                    ProjectRoleId = member.ProjectRole.ProjectRoleId,
+                    DateJoined = DateTime.UtcNow,
+                    Position = member.Position
+                };
+                _db.ProjectTeam.Add(newMember);
+            }
+            await _db.SaveChangesAsync();
+
             await _db.Entry(newProject).Collection(b => b.QuickLinksHousingProject).LoadAsync();
             var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == newProject.ProjectId).CountAsync();
 

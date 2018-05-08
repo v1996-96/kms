@@ -14,5 +14,6 @@ namespace kms.Models
         public string Avatar { get; set; }
         public bool IsOpen { get; set; }
         public bool IsActive { get; set; }
+        public IEnumerable<ProjectTeamCreateDto> Team { get; set; }
     }
 }

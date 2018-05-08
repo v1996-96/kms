@@ -17,6 +17,7 @@ namespace kms.Data
 
         public KMSDBConnection(string connectionString)
         {
+            Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
             this.connection = new NpgsqlConnection(connectionString);
         }
 

@@ -5,6 +5,7 @@ namespace kms.Models
 {
     public class ProjectShortDto
     {
+        public ProjectShortDto() {}
         public ProjectShortDto(Projects project, int membersCount = 0)
         {
             if (project != null) {

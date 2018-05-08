@@ -47,6 +47,8 @@ namespace kms
             string connectionString = Configuration.GetConnectionString("KMSDBConnection");
             services.AddDbContext<KMSDBContext>(options => options.UseLoggerFactory(MyLoggerFactory).UseNpgsql(connectionString));
 
+            services.AddTransient<IKMSDBConnection, KMSDBConnection>(provider => new KMSDBConnection(connectionString));
+
             services.AddSingleton<IConfiguration>(Configuration);
 
             var jwtSection = Configuration.GetSection("jwt");

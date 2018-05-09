@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using kms.Data;
 using kms.Data.Entities;
+using kms.Data.Seed;
 using kms.Models;
 using kms.Repository;
 using kms.Services;
@@ -45,7 +46,8 @@ namespace kms
         public void ConfigureServices(IServiceCollection services)
         {
             string connectionString = Configuration.GetConnectionString("KMSDBConnection");
-            services.AddDbContext<KMSDBContext>(options => options.UseLoggerFactory(MyLoggerFactory).UseNpgsql(connectionString));
+            // services.AddDbContext<KMSDBContext>(options => options.UseLoggerFactory(MyLoggerFactory).UseNpgsql(connectionString));
+            services.AddDbContext<KMSDBContext>(options => options.UseNpgsql(connectionString));
 
             services.AddTransient<IKMSDBConnection, KMSDBConnection>(provider => new KMSDBConnection(connectionString));
 
@@ -98,6 +100,11 @@ namespace kms
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                serviceScope.ServiceProvider.GetService<KMSDBContext>().EnsureSeeded().Wait();
             }
 
             app.UseAuthentication();

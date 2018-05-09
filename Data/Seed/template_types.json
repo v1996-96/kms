@@ -1,0 +1,12 @@
+[
+    {
+        "template_type_slug": "system_intro",
+        "name": "System intro",
+        "system": true
+    },
+    {
+        "template_type_slug": "project_intro",
+        "name": "Project intro",
+        "system": true
+    }
+]

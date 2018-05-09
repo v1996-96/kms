@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Manager",
+        "permissions": [
+            "read_project_team",
+            "create_project_team",
+            "update_project_team",
+            "delete_project_team",
+            "read_project_permissions",
+            "read_project_roles",
+            "create_project_roles",
+            "update_project_roles",
+            "delete_project_roles",
+            "read_documents",
+            "create_documents",
+            "update_documents",
+            "delete_documents",
+            "read_document_attachments",
+            "create_document_attachments",
+            "update_document_attachments",
+            "delete_document_attachments",
+            "read_document_comments",
+            "create_document_comments",
+            "update_document_comments",
+            "delete_document_comments"
+        ]
+    },
+    {
+        "name": "Employee",
+        "permissions": [
+            "read_project_team",
+            "read_documents",
+            "create_documents",
+            "update_documents",
+            "delete_documents",
+            "read_document_attachments",
+            "create_document_attachments",
+            "update_document_attachments",
+            "delete_document_attachments",
+            "read_document_comments",
+            "create_document_comments"
+        ]
+    }
+]

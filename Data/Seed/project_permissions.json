@@ -1,0 +1,23 @@
+[
+    { "project_permission_slug": "read_project_team", "name": "Read project team" },
+    { "project_permission_slug": "create_project_team", "name": "Create project team" },
+    { "project_permission_slug": "update_project_team", "name": "Update project team" },
+    { "project_permission_slug": "delete_project_team", "name": "Delete project team" },
+    { "project_permission_slug": "read_project_permissions", "name": "Read project permissions" },
+    { "project_permission_slug": "read_project_roles", "name": "Read project roles" },
+    { "project_permission_slug": "create_project_roles", "name": "Create project roles" },
+    { "project_permission_slug": "update_project_roles", "name": "Update project roles" },
+    { "project_permission_slug": "delete_project_roles", "name": "Delete project roles" },
+    { "project_permission_slug": "read_documents", "name": "Read documents" },
+    { "project_permission_slug": "create_documents", "name": "Create documents" },
+    { "project_permission_slug": "update_documents", "name": "Update documents" },
+    { "project_permission_slug": "delete_documents", "name": "Delete documents" },
+    { "project_permission_slug": "read_document_attachments", "name": "Read document attachments" },
+    { "project_permission_slug": "create_document_attachments", "name": "Create document attachments" },
+    { "project_permission_slug": "update_document_attachments", "name": "Update document attachments" },
+    { "project_permission_slug": "delete_document_attachments", "name": "Delete document attachments" },
+    { "project_permission_slug": "read_document_comments", "name": "Read document comments" },
+    { "project_permission_slug": "create_document_comments", "name": "Create document comments" },
+    { "project_permission_slug": "update_document_comments", "name": "Update document comments" },
+    { "project_permission_slug": "delete_document_comments", "name": "Delete document comments" }
+]

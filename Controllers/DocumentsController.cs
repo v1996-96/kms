@@ -83,7 +83,14 @@ namespace kms.Controllers
         #region CRUD
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? project, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query, [FromQuery] bool? isDraft)
+        public async Task<IActionResult> GetList(
+            [FromQuery] int? project,
+            [FromQuery] bool? root,
+            [FromQuery] int? children,
+            [FromQuery] int? offset,
+            [FromQuery] int? limit,
+            [FromQuery] string query,
+            [FromQuery] bool? isDraft)
         {
             IQueryable<Documents> documentsQuery = _db.Documents;
 
@@ -97,6 +104,12 @@ namespace kms.Controllers
 
             if (isDraft.HasValue) {
                 documentsQuery = documentsQuery.Where(d => d.IsDraft == isDraft.Value);
+            }
+
+            if (root.HasValue) {
+                documentsQuery = documentsQuery.Where(d => d.ParentDocumentId == null);
+            } else if (children.HasValue) {
+                documentsQuery = documentsQuery.Where(d => d.ParentDocumentId == children.Value);
             }
 
             if (query.IsValidQuery()) {

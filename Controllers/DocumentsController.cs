@@ -113,7 +113,7 @@ namespace kms.Controllers
 
         [HttpGet("{id:int}")]
         [HttpGet("{slug:regex([[\\w-]])}")]
-        public async Task<IActionResult> GetSingle([FromRoute] int? id, [FromRoute] string slug)
+        public async Task<IActionResult> GetSingle([FromRoute] int? id, [FromRoute] string slug, [FromQuery] bool? quill)
         {
             var document = await GetDocument(id, slug);
             if (document == null)
@@ -121,7 +121,7 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            return Ok(await PrepareDocument(document));
+            return Ok(await PrepareDocument(document, quill));
         }
 
         [HttpPost]
@@ -517,11 +517,12 @@ namespace kms.Controllers
             return document;
         }
 
-        private async Task<DocumentDto> PrepareDocument(Documents document) {
+        private async Task<DocumentDto> PrepareDocument(Documents document, bool? quill = false) {
             var documentText = await _db.DocumentText.SingleOrDefaultAsync(t => t.DocumentId == document.DocumentId && t.IsActual);
             var content = documentText == null ? "" : documentText.Content;
+            var quillDelta = documentText != null && quill.HasValue && quill.Value ? documentText.QuillDelta : "";
             var likesCount = await _db.DocumentLikes.Where(l => l.DocumentId == document.DocumentId).CountAsync();
-            return new DocumentDto(document, content, likesCount);
+            return new DocumentDto(document, content, likesCount, quillDelta);
         }
     }
 }

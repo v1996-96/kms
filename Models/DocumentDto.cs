@@ -26,6 +26,10 @@ namespace kms.Models
                     ProjectName = document.Project.Name;
                     ProjectSlug = document.Project.Slug;
                 }
+
+                if (document.ParentDocument != null) {
+                    ParentDocumentSlug = document.ParentDocument.Slug;
+                }
             }
 
             Content = content;
@@ -34,6 +38,7 @@ namespace kms.Models
         }
         public int DocumentId { get; set; }
         public int? ParentDocumentId { get; set; }
+        public string ParentDocumentSlug { get; set; }
         public int? CreatorId { get; set; }
         public string Slug { get; set; }
         public string Title { get; set; }

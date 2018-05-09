@@ -120,7 +120,7 @@ namespace kms.Controllers
 
             var count = await documentsQuery.CountAsync();
             var results = await documentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50)
-                .Include(d => d.DocumentLikes).Include(d => d.Project).Select(d => new DocumentShortDto(d, d.DocumentLikes.Count())).ToListAsync();
+                .Include(d => d.DocumentLikes).Include(d => d.ParentDocument).Include(d => d.Project).Select(d => new DocumentShortDto(d, d.DocumentLikes.Count())).ToListAsync();
             return Ok(new { count, results });
         }
 
@@ -515,7 +515,7 @@ namespace kms.Controllers
 
 
         private async Task<Documents> GetDocument(int? id, string slug) {
-            IQueryable<Documents> documentQuery = _db.Documents.Include(d => d.Creator).Include(d => d.Project);
+            IQueryable<Documents> documentQuery = _db.Documents.Include(d => d.Creator).Include(d => d.Project).Include(d => d.ParentDocument);
             Documents document;
 
             if (id.HasValue)

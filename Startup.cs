@@ -113,6 +113,8 @@ namespace kms
 
             app.UseCors("AppCors");
 
+            app.UseStaticFiles();
+
             app.UseMvc();
         }
     }

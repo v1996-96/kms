@@ -420,9 +420,11 @@ namespace kms.Controllers
                 return NotFound();
             }
 
+            var protocol = Request.IsHttps ? "https://" : "http://";
+
             var attachmentsQuery = _db.Attachments.Where(c => c.DocumentId == document.DocumentId).OrderByDescending(c => c.TimeCreated);
             var count = await attachmentsQuery.CountAsync();
-            var results = await attachmentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Select(c => new AttachmentDto(c)).ToListAsync();
+            var results = await attachmentsQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Select(c => new AttachmentDto(c, protocol + Request.Host.Value)).ToListAsync();
             return Ok(new { count, results });
         }
 

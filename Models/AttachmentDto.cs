@@ -1,18 +1,19 @@
 using System;
+using System.IO;
 using kms.Data.Entities;
 
 namespace kms.Models
 {
     public class AttachmentDto
     {
-        public AttachmentDto(Attachments attachment)
+        public AttachmentDto(Attachments attachment, string hostname = "")
         {
             if (attachment != null) {
                 AttachmentId = attachment.AttachmentId;
                 DocumentId = attachment.DocumentId;
                 UserId = attachment.UserId;
                 Name = attachment.Name;
-                Link = attachment.Link;
+                Link = Path.Combine(hostname, attachment.Link);
                 Type = attachment.Type;
                 TimeCreated = attachment.TimeCreated;
             }

@@ -25,10 +25,15 @@ namespace kms.Controllers
         public async Task<IActionResult> SignIn([FromBody] SigninDto model)
             => Ok(await _accountRepository.SignIn(model.Email, model.Password));
 
-        [HttpPost("signup")]
+        [HttpPost("signup/{token}")]
         [AllowAnonymous]
-        public async Task<IActionResult> SignUp([FromBody] Users user)
-            => Ok(await _accountRepository.SignUp(user));
+        public async Task<IActionResult> SignUp([FromBody] Users user, [FromRoute] string token)
+            => Ok(await _accountRepository.SignUp(user, token));
+
+        [HttpGet("invite/{token}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyInviteToken([FromRoute] string token)
+            => Ok(await _accountRepository.VerifyInviteToken(token));
 
         [HttpPost("refresh/{token}")]
         public async Task<IActionResult> RefreshAccessToken([FromRoute] string token)

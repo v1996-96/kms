@@ -26,6 +26,25 @@ namespace kms.Repository
             this._passwordHasher = passwordHasher;
         }
 
+        public async Task<InviteDto> VerifyInviteToken(string token) {
+            var dbToken = await _db.InviteTokens.SingleOrDefaultAsync(t => t.Token == token);
+            if (dbToken == null) {
+                throw new Exception("Token not found");
+            }
+
+            var user = await _db.Users.SingleOrDefaultAsync(u => u.Email == dbToken.Email);
+            if (user != null) {
+                _db.InviteTokens.Remove(dbToken);
+                await _db.SaveChangesAsync();
+                throw new Exception("User with corresponding email is already registered");
+            }
+
+            return new InviteDto{
+                Email = dbToken.Email,
+                TimeCreated = dbToken.TimeCreated
+            };
+        }
+
         public async Task<Jwt> RefreshAccessToken(string token)
         {
             var refreshToken = await _db.RefreshTokens.SingleOrDefaultAsync(t => t.Token == token);
@@ -104,9 +123,14 @@ namespace kms.Repository
             return jwt;
         }
 
-        public async Task<Jwt> SignUp(Users user)
+        public async Task<Jwt> SignUp(Users user, string token)
         {
-            var userByEmail = await _db.Users.SingleOrDefaultAsync(u => u.Email == user.Email);
+            var inviteToken = await _db.InviteTokens.SingleOrDefaultAsync(t => t.Token == token);
+            if (inviteToken == null) {
+                throw new Exception("Invite token not found");
+            }
+
+            var userByEmail = await _db.Users.SingleOrDefaultAsync(u => u.Email == inviteToken.Email);
             if (userByEmail != null) {
                 throw new Exception("Username with provided email already exists.");
             }
@@ -114,6 +138,7 @@ namespace kms.Repository
             var unhahshedPassword = user.Password;
             user.Password = _passwordHasher.HashPassword(user, user.Password);
             user.DateRegistered = DateTime.UtcNow;
+            user.Email = inviteToken.Email;
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();

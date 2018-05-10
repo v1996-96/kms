@@ -74,5 +74,9 @@ namespace kms.Repository
             => statement.FromSql(@"select * from templates
                 where template_tsv @@ phraseto_tsquery(coalesce({0}, ''))
                 order by ts_rank(template_tsv, phraseto_tsquery(coalesce({0}, ''))) desc", query);
+
+        public IQueryable<TemplateTypes> SearchTemplateTypes(string query) => SearchTemplateTypes(_db.TemplateTypes, query);
+        public IQueryable<TemplateTypes> SearchTemplateTypes(IQueryable<TemplateTypes> statement, string query)
+            => statement.FromSql("select * from template_types where name % {0} order by name <-> {0}", query);
     }
 }

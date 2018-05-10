@@ -8,5 +8,10 @@
         "template_type_slug": "project_intro",
         "name": "Project intro",
         "system": true
+    },
+    {
+        "template_type_slug": "template",
+        "name": "Document template",
+        "system": false
     }
 ]

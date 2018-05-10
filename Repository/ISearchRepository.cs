@@ -35,5 +35,8 @@ namespace kms.Repository
 
         IQueryable<Templates> SearchTemplates(string query);
         IQueryable<Templates> SearchTemplates(IQueryable<Templates> statement, string query);
+
+        IQueryable<TemplateTypes> SearchTemplateTypes(string query);
+        IQueryable<TemplateTypes> SearchTemplateTypes(IQueryable<TemplateTypes> statement, string query);
     }
 }

@@ -29,15 +29,28 @@ namespace kms.Controllers
 
 
         [HttpGet("types")]
-        public async Task<IActionResult> GetTemplateTypes() {
-            var types = await _db.TemplateTypes.OrderByDescending(t => t.System).ToListAsync();
-            return Ok(new { types = types.Select(t => new TemplateTypeDto(t)) });
+        public async Task<IActionResult> GetTemplateTypes([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query, [FromQuery] bool? all, [FromQuery] int? project) {
+            IQueryable<TemplateTypes> templateTypesQuery = _db.TemplateTypes.Include(t => t.Templates);
+
+            if (query.IsValidQuery()) {
+                templateTypesQuery = _search.SearchTemplateTypes(templateTypesQuery, query);
+            } else {
+                templateTypesQuery = templateTypesQuery.OrderBy(d => d.Name);
+            }
+
+            if (!all.HasValue) {
+                templateTypesQuery = templateTypesQuery.Where(t => t.System && (t.Templates.Where(a => a.ProjectId == project).Count() == 0) || !t.System);
+            }
+
+            var count = await templateTypesQuery.CountAsync();
+            var results = await templateTypesQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).Select(d => new TemplateTypeDto(d)).ToListAsync();
+            return Ok(new { count, results });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] int? project, [FromQuery] string type, [FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
         {
-            IQueryable<Templates> templatesQuery = _db.Templates;
+            IQueryable<Templates> templatesQuery = _db.Templates.Include(t => t.TemplateTypeSlugNavigation);
 
             if (type != null && type != "") {
                 templatesQuery = templatesQuery.Where(d => d.TemplateTypeSlug == type);
@@ -62,7 +75,7 @@ namespace kms.Controllers
 
         [HttpGet("type/{slug:regex([[\\w-]])}")]
         public async Task<IActionResult> GetSingleByType([FromRoute] string slug, [FromQuery] int? project) {
-            IQueryable<Templates> templateQuery = _db.Templates.Include(t => t.Creator);
+            IQueryable<Templates> templateQuery = _db.Templates.Include(t => t.Creator).Include(t => t.TemplateTypeSlugNavigation).Include(t => t.Project);
 
             if (project.HasValue) {
                 templateQuery = templateQuery.Where(t => t.ProjectId == project.Value);

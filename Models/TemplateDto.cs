@@ -20,6 +20,15 @@ namespace kms.Models
                 if (template.Creator != null) {
                     Creator = new UserShortDto(template.Creator);
                 }
+
+                if (template.TemplateTypeSlugNavigation != null) {
+                    System = template.TemplateTypeSlugNavigation.System;
+                }
+
+                if (template.Project != null) {
+                    ProjectName = template.Project.Name;
+                    ProjectSlug = template.Project.Slug;
+                }
             }
 
             Content = content;
@@ -28,6 +37,8 @@ namespace kms.Models
         public int TemplateId { get; set; }
         public string TemplateType { get; set; }
         public int? ProjectId { get; set; }
+        public string ProjectName { get; set; }
+        public string ProjectSlug { get; set; }
         public int? CreatorId { get; set; }
         public string Slug { get; set; }
         public string Title { get; set; }
@@ -36,5 +47,6 @@ namespace kms.Models
         public string QuillDelta { get; set; }
         public DateTime DateCreated { get; set; }
         public UserShortDto Creator { get; set; }
+        public bool System { get; set; }
     }
 }

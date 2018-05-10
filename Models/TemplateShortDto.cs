@@ -16,6 +16,10 @@ namespace kms.Models
                 Title = template.Title;
                 Description = template.Description;
                 DateCreated = template.DateCreated;
+
+                if (template.TemplateTypeSlugNavigation != null) {
+                    System = template.TemplateTypeSlugNavigation.System;
+                }
             }
         }
         public int TemplateId { get; set; }
@@ -26,5 +30,6 @@ namespace kms.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime DateCreated { get; set; }
+        public bool System { get; set; }
     }
 }

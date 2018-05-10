@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using kms.Data.Entities;
+using kms.Utils;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -14,6 +15,12 @@ namespace kms.Data.Seed
         public string Name { get; set; }
         public IEnumerable<string> Permissions { get; set; }
     }
+    public class TemplateSerializer {
+        public string TemplateTypeSlug { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Content { get; set; }
+    }
     public static class DbSeeder
     {
         public static async Task EnsureSeeded(this KMSDBContext db) {
@@ -23,6 +30,7 @@ namespace kms.Data.Seed
             serializerSettings.Formatting = Formatting.Indented;
 
             await SeedTemplateTypes(db, dirname, serializerSettings);
+            await SeedTemplates(db, dirname, serializerSettings);
             await SeedPermissions(db, dirname, serializerSettings);
             await SeedRoles(db, dirname, serializerSettings);
             await SeedProjectPermissions(db, dirname, serializerSettings);
@@ -39,6 +47,37 @@ namespace kms.Data.Seed
                 }
             }
             await db.SaveChangesAsync();
+        }
+        private static async Task SeedTemplates(KMSDBContext db, string dirname, JsonSerializerSettings serializerSettings) {
+            var templatesJson = await File.ReadAllTextAsync(Path.Combine(dirname, "templates.json"));
+            var templates = JsonConvert.DeserializeObject<List<TemplateSerializer>>(templatesJson, serializerSettings);
+            foreach (var item in templates) {
+                var existingType = await db.TemplateTypes.SingleOrDefaultAsync(t => t.TemplateTypeSlug == item.TemplateTypeSlug);
+                if (existingType == null) {
+                    throw new Exception("Template type not found");
+                }
+
+                var existingTemplate = await db.Templates.SingleOrDefaultAsync(t => t.TemplateTypeSlug == item.TemplateTypeSlug && t.ProjectId == null);
+                if (existingTemplate == null) {
+                    var newTemplate = new Templates{
+                        TemplateTypeSlug = item.TemplateTypeSlug,
+                        Slug = item.Title.GenerateSlug(),
+                        Title = item.Title,
+                        Description = item.Description,
+                        DateCreated = DateTime.UtcNow
+                    };
+                    db.Templates.Add(newTemplate);
+                    await db.SaveChangesAsync();
+
+                    var newTemplateText = new TemplateText{
+                        TemplateId = newTemplate.TemplateId,
+                        Content = item.Content,
+                        TimeUpdated = DateTime.UtcNow
+                    };
+                    db.TemplateText.Add(newTemplateText);
+                    await db.SaveChangesAsync();
+                }
+            }
         }
         private static async Task SeedPermissions(KMSDBContext db, string dirname, JsonSerializerSettings serializerSettings) {
             var permissionsJson = await File.ReadAllTextAsync(Path.Combine(dirname, "permissions.json"));

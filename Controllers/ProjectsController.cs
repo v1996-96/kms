@@ -99,6 +99,7 @@ namespace kms.Controllers
                 return BadRequest(new { message = "Cannot generate unique slug" });
             }
 
+            // Creating new project
             var newProject = new Projects
             {
                 Slug = slug,
@@ -115,6 +116,8 @@ namespace kms.Controllers
             _db.Projects.Add(newProject);
             await _db.SaveChangesAsync();
 
+
+            // Assigning team to project
             foreach (var member in project.Team)
             {
                 if (member == null)
@@ -150,6 +153,36 @@ namespace kms.Controllers
                 _db.ProjectTeam.Add(newMember);
             }
             await _db.SaveChangesAsync();
+
+
+            // Copying template for project
+            var projectIntroTemplate = await _db.Templates.SingleOrDefaultAsync(t => t.TemplateTypeSlug == "project_intro");
+            if (projectIntroTemplate != null) {
+                var newTemplate = new Templates{
+                    TemplateTypeSlug = projectIntroTemplate.TemplateTypeSlug,
+                    ProjectId = newProject.ProjectId,
+                    CreatorId = UserId,
+                    Slug = newProject.Name.GenerateSlug(),
+                    Title = projectIntroTemplate.Title,
+                    Description = projectIntroTemplate.Description,
+                    DateCreated = DateTime.UtcNow
+                };
+                _db.Templates.Add(newTemplate);
+                await _db.SaveChangesAsync();
+
+                var templateText = await _db.TemplateText.SingleOrDefaultAsync(t => t.TemplateId == projectIntroTemplate.TemplateId && t.IsActual);
+                if (templateText != null) {
+                    var newTemplateText = new TemplateText{
+                        TemplateId = newTemplate.TemplateId,
+                        EditorId = UserId,
+                        Content = templateText.Content,
+                        QuillDelta = templateText.QuillDelta,
+                        TimeUpdated = DateTime.UtcNow
+                    };
+                    _db.TemplateText.Add(newTemplateText);
+                    await _db.SaveChangesAsync();
+                }
+            }
 
             await _db.Entry(newProject).Collection(b => b.QuickLinksHousingProject).LoadAsync();
             var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == newProject.ProjectId).CountAsync();

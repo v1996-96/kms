@@ -1,0 +1,14 @@
+[
+    {
+        "template_type_slug": "system_intro",
+        "title": "Welcome to KMS",
+        "description": "The place for managing project knowledge",
+        "content": "<p class=\"text-xs-center\"><img src=\"/static/knowledge.svg\" width=\"100\" /></p><p class=\"text-xs-center\">There will be some motivation for work in form of the short text. I will write it later. <a href=\"#\">Edit welcome message</a></p>"
+    },
+    {
+        "template_type_slug": "project_intro",
+        "title": "Project intro template",
+        "description": "This template will be copied to the projects on creation",
+        "content": "<h2>Awesome article that introduces users to the insights of the project</h2><p>You can place there some links to the project entries or assets in order to highlight important project features, team thoughts and other important stuff.</p>"
+    }
+]

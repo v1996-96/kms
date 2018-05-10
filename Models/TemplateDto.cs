@@ -5,7 +5,7 @@ namespace kms.Models
 {
     public class TemplateDto
     {
-        public TemplateDto(Templates template, string content = "")
+        public TemplateDto(Templates template, string content = "", string quillDelta = "")
         {
             if (template != null) {
                 TemplateId = template.TemplateId;
@@ -23,6 +23,7 @@ namespace kms.Models
             }
 
             Content = content;
+            QuillDelta = quillDelta;
         }
         public int TemplateId { get; set; }
         public string TemplateType { get; set; }
@@ -32,6 +33,7 @@ namespace kms.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public string Content { get; set; }
+        public string QuillDelta { get; set; }
         public DateTime DateCreated { get; set; }
         public UserShortDto Creator { get; set; }
     }

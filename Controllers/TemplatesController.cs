@@ -80,7 +80,7 @@ namespace kms.Controllers
 
         [HttpGet("{id:int}")]
         [HttpGet("{slug:regex([[\\w-]])}")]
-        public async Task<IActionResult> GetSingle([FromRoute] int? id, [FromRoute] string slug)
+        public async Task<IActionResult> GetSingle([FromRoute] int? id, [FromRoute] string slug, [FromQuery] bool? quill)
         {
             var template = await GetTemplate(id, slug);
             if (template == null)
@@ -90,7 +90,8 @@ namespace kms.Controllers
 
             var templateText = await _db.TemplateText.SingleOrDefaultAsync(t => t.TemplateId == template.TemplateId && t.IsActual);
             var content = templateText == null ? "" : templateText.Content;
-            return Ok(new TemplateDto(template, content));
+            var quillDelta = templateText != null && quill.HasValue && quill.Value ? templateText.QuillDelta : "";
+            return Ok(new TemplateDto(template, content, quillDelta));
         }
 
         [HttpPost]

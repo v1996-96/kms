@@ -253,7 +253,7 @@ namespace kms.Controllers
 
 
         private async Task<Templates> GetTemplate(int? id, string slug) {
-            IQueryable<Templates> templateQuery = _db.Templates.Include(t => t.Creator);
+            IQueryable<Templates> templateQuery = _db.Templates.Include(t => t.Creator).Include(t => t.Project).Include(t => t.TemplateTypeSlugNavigation);
             Templates template;
 
             if (id.HasValue) {

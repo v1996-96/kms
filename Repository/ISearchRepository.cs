@@ -1,5 +1,7 @@
 using System.Linq;
+using System.Threading.Tasks;
 using kms.Data.Entities;
+using kms.Models;
 
 namespace kms.Repository
 {
@@ -38,5 +40,6 @@ namespace kms.Repository
 
         IQueryable<TemplateTypes> SearchTemplateTypes(string query);
         IQueryable<TemplateTypes> SearchTemplateTypes(IQueryable<TemplateTypes> statement, string query);
+        Task<SearchResultsDto> CommonSearch(string query, int? limit = 50, int? offset = 0);
     }
 }

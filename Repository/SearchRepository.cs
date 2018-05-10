@@ -1,5 +1,11 @@
+using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
+using System.Threading.Tasks;
+using Dapper;
+using kms.Data;
 using kms.Data.Entities;
+using kms.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace kms.Repository
@@ -7,8 +13,10 @@ namespace kms.Repository
     public class SearchRepository : ISearchRepository
     {
         private readonly KMSDBContext _db;
-        public SearchRepository(KMSDBContext context)
+        private readonly DbConnection _dbconnection;
+        public SearchRepository(KMSDBContext context, IKMSDBConnection connection)
         {
+            this._dbconnection = connection.Connection;
             this._db = context;
         }
 
@@ -78,5 +86,55 @@ namespace kms.Repository
         public IQueryable<TemplateTypes> SearchTemplateTypes(string query) => SearchTemplateTypes(_db.TemplateTypes, query);
         public IQueryable<TemplateTypes> SearchTemplateTypes(IQueryable<TemplateTypes> statement, string query)
             => statement.FromSql("select * from template_types where name % {0} order by name <-> {0}", query);
+
+
+        public async Task<SearchResultsDto> CommonSearch(string query, int? limit = 50, int? offset = 0)
+        {
+            var sqlQuery = @"select * from (
+                (select
+                    p.name as name,
+                    p.project_id as id,
+                    p.avatar as avatar,
+                    null as parent_slug,
+                    p.slug as slug,
+                    'project' as type,
+                    similarity(p.name, @query) as rank
+                from projects as p
+                where p.name % @query
+                order by p.name <-> @query)
+                union
+                (select
+                    d.title as name,
+                    d.document_id as id,
+                    null as avatar,
+                    pr.slug as parent_slug,
+                    d.slug as slug,
+                    'document' as type,
+                    ts_rank(d.document_tsv, phraseto_tsquery(coalesce(@query, ''))) as rank
+                from documents as d
+                left join projects as pr on pr.project_id = d.project_id
+                where d.document_tsv @@ phraseto_tsquery(coalesce(@query, ''))
+                order by ts_rank(d.document_tsv, phraseto_tsquery(coalesce(@query, ''))) desc)
+                union
+                (select
+                    (u.name || ' ' || u.surname) as name,
+                    u.user_id as id,
+                    u.avatar as avatar,
+                    null as parent_slug,
+                    null as slug,
+                    'user' as type ,
+                    (similarity(u.name, @query) + similarity(u.surname, @query))/2 as rank
+                from users as u
+                where u.name % @query or u.surname % @query
+                order by u.name <-> @query, u.surname <-> @query)
+                ) as results order by results.rank desc";
+
+            var searchResults = await _dbconnection.QueryAsync<SearchResults>(sqlQuery, new { query });
+
+            return new SearchResultsDto{
+                Count = searchResults.Count(),
+                Results = searchResults.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50)
+            };
+        }
     }
 }

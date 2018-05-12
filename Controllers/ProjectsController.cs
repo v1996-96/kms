@@ -156,7 +156,7 @@ namespace kms.Controllers
 
 
             // Copying template for project
-            var projectIntroTemplate = await _db.Templates.SingleOrDefaultAsync(t => t.TemplateTypeSlug == "project_intro");
+            var projectIntroTemplate = await _db.Templates.SingleOrDefaultAsync(t => t.TemplateTypeSlug == "project_intro" && t.ProjectId == null);
             if (projectIntroTemplate != null) {
                 var newTemplate = new Templates{
                     TemplateTypeSlug = projectIntroTemplate.TemplateTypeSlug,

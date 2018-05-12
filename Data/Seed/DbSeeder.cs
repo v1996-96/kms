@@ -26,7 +26,8 @@ namespace kms.Data.Seed
         public static async Task EnsureSeeded(this KMSDBContext db) {
             var dirname = Path.Combine("Data", "Seed");
             var serializerSettings = new JsonSerializerSettings();
-            serializerSettings.ContractResolver = new DefaultContractResolver{ NamingStrategy = new SnakeCaseNamingStrategy() };
+            serializerSettings.ContractResolver =
+                new DefaultContractResolver{ NamingStrategy = new SnakeCaseNamingStrategy() };
             serializerSettings.Formatting = Formatting.Indented;
 
             await SeedTemplateTypes(db, dirname, serializerSettings);

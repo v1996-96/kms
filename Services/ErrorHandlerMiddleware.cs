@@ -5,29 +5,19 @@ using Newtonsoft.Json;
 
 namespace kms.Services
 {
-    public class ErrorHandlerMiddleware
-    {
+    public class ErrorHandlerMiddleware {
         private readonly RequestDelegate _next;
-
-        public ErrorHandlerMiddleware(RequestDelegate next)
-        {
+        public ErrorHandlerMiddleware(RequestDelegate next) {
             _next = next;
         }
-
-        public async Task Invoke(HttpContext context)
-        {
-            try
-            {
+        public async Task Invoke(HttpContext context) {
+            try {
                 await _next(context);
-            }
-            catch (Exception exception)
-            {
+            } catch (Exception exception) {
                 await HandleErrorAsync(context, exception);
             }
         }
-
-        private static Task HandleErrorAsync(HttpContext context, Exception exception)
-        {
+        private static Task HandleErrorAsync(HttpContext context, Exception exception) {
             var response = new { message = exception.Message };
             var payload = JsonConvert.SerializeObject(response);
             context.Response.ContentType = "application/json";

@@ -43,6 +43,16 @@ namespace kms.Controllers
             return Ok(new { count, results });
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetByDocument([FromRoute] int id) {
+            var document = await _db.Bookmarks.Include(f => f.Document).SingleOrDefaultAsync(f => f.DocumentId == id && f.UserId == UserId);
+            if (document == null) {
+                return NotFound();
+            }
+
+            return Ok(new BookmarkDto(document));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] BookmarkCreateDto bookmark)
         {

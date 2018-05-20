@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using kms.Utils;
 using kms.Services;
+using Newtonsoft.Json;
 
 namespace kms.Controllers
 {
@@ -188,6 +189,11 @@ namespace kms.Controllers
             _db.DocumentText.Add(newDocumentText);
             await _db.SaveChangesAsync();
 
+            await this.SaveActivity(newDocument.DocumentId, @"Document created: " + newDocument.Title, new {
+                document_id = newDocument.DocumentId,
+                type = "create"
+            });
+
             return Ok(await PrepareDocument(newDocument));
         }
 
@@ -234,6 +240,11 @@ namespace kms.Controllers
 
             await _db.SaveChangesAsync();
 
+            await this.SaveActivity(document.DocumentId, @"Document modified: " + document.Title, new {
+                document_id = document.DocumentId,
+                type = "update"
+            });
+
             return Ok(await PrepareDocument(document));
         }
 
@@ -246,6 +257,11 @@ namespace kms.Controllers
             {
                 return NotFound();
             }
+
+            await this.SaveActivity(document.DocumentId, @"Document deleted: " + document.Title, new {
+                document_id = document.DocumentId,
+                type = "update"
+            });
 
             _db.Documents.Remove(document);
             await _db.SaveChangesAsync();
@@ -305,6 +321,12 @@ namespace kms.Controllers
             _db.Comments.Add(newComment);
             await _db.SaveChangesAsync();
             await _db.Entry(newComment).Reference(c => c.User).LoadAsync();
+
+            await this.SaveActivity(document.DocumentId, @"Document commented: " + comment.Content, new {
+                document_id = document.DocumentId,
+                type = "create"
+            });
+
             return Ok(new CommentDto(newComment));
         }
 
@@ -539,6 +561,24 @@ namespace kms.Controllers
             var quillDelta = documentText != null && quill.HasValue && quill.Value ? documentText.QuillDelta : "";
             var likesCount = await _db.DocumentLikes.Where(l => l.DocumentId == document.DocumentId).CountAsync();
             return new DocumentDto(document, content, likesCount, quillDelta);
+        }
+
+
+        private async Task SaveActivity(int documentId, string message, object meta = null) {
+            var document = await _db.Documents.SingleOrDefaultAsync(d => d.DocumentId == documentId);
+            if (document == null) {
+                return;
+            }
+
+            var newActivity = new Activity{
+                ProjectId = document.ProjectId,
+                UserId = UserId,
+                Content = message,
+                TimeFired = DateTime.UtcNow,
+                Meta = JsonConvert.SerializeObject(meta)
+            };
+            _db.Activity.Add(newActivity);
+            await _db.SaveChangesAsync();
         }
     }
 }

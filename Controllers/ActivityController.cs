@@ -29,7 +29,7 @@ namespace kms.Controllers
             if (project.HasValue) {
                 activitiesQuery = activitiesQuery.Where(a => a.ProjectId == project.Value).OrderByDescending(a => a.TimeFired);
             } else {
-                activitiesQuery = activitiesQuery.Where(a => a.Project.ProjectTeam.All(pt => pt.UserId == UserId)).OrderByDescending(a => a.TimeFired);
+                activitiesQuery = activitiesQuery.Where(a => a.Project.ProjectTeam.Any(pt => pt.UserId == UserId)).OrderByDescending(a => a.TimeFired);
             }
 
             var count = await activitiesQuery.CountAsync();

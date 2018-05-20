@@ -7,7 +7,7 @@ namespace kms.Models
 {
     public class ProfileDto
     {
-        public ProfileDto(Users user, ICollection<Roles> roles = null, ICollection<Permissions> permissions = null)
+        public ProfileDto(Users user, IEnumerable<Roles> roles = null, IEnumerable<Permissions> permissions = null)
         {
             if (user != null) {
                 UserId = user.UserId;
@@ -32,7 +32,7 @@ namespace kms.Models
         public string Email { get; set; }
         public string Avatar { get; set; }
         public DateTime? DateRegistered { get; set; }
-        public ICollection<string> Roles { get; set; }
-        public ICollection<string> Permissions { get; set; }
+        public IEnumerable<string> Roles { get; set; }
+        public IEnumerable<string> Permissions { get; set; }
     }
 }

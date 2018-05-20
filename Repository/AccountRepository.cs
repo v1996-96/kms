@@ -135,12 +135,20 @@ namespace kms.Repository
                 throw new Exception("Username with provided email already exists.");
             }
 
+            var employeeRole = await _db.Roles.SingleOrDefaultAsync(r => r.Name == "Employee" && r.System);
+            if (employeeRole == null) {
+                throw new Exception("Error occured within registration process");
+            }
+
             var unhahshedPassword = user.Password;
             user.Password = _passwordHasher.HashPassword(user, user.Password);
             user.DateRegistered = DateTime.UtcNow;
             user.Email = inviteToken.Email;
 
             _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            _db.UserRoles.Add(new UserRoles{ UserId = user.UserId, RoleId = employeeRole.RoleId });
             await _db.SaveChangesAsync();
 
             return await SignIn(user.Email, unhahshedPassword);

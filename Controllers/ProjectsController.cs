@@ -369,9 +369,9 @@ namespace kms.Controllers
 
             if (updatedRole.Permissions != null)
             {
-                var toDelete = role.ProjectRolePermissions.Where(uc => !updatedRole.Permissions.Select(c => c.ProjectPermissionSlug).Contains(uc.ProjectPermissionSlug)).Select(uc => uc.ProjectPermissionSlug);
+                var toDelete = role.ProjectRolePermissions.Where(uc => !updatedRole.Permissions.Select(c => c.ProjectPermissionSlug).Contains(uc.ProjectPermissionSlug) && uc.ProjectRoleId == id).Select(uc => uc.ProjectPermissionSlug);
                 var toAdd = updatedRole.Permissions.Where(u => !role.ProjectRolePermissions.Select(uc => uc.ProjectPermissionSlug).Contains(u.ProjectPermissionSlug)).Select(c => c.ProjectPermissionSlug);
-                _db.ProjectRolePermissions.RemoveRange(_db.ProjectRolePermissions.Where(uc => toDelete.Contains(uc.ProjectPermissionSlug)));
+                _db.ProjectRolePermissions.RemoveRange(_db.ProjectRolePermissions.Where(uc => toDelete.Contains(uc.ProjectPermissionSlug) && uc.ProjectRoleId == id));
                 var existingPermissionsToAdd = await _db.ProjectPermissions.Where(uc => toAdd.Contains(uc.ProjectPermissionSlug)).ToListAsync();
                 _db.ProjectRolePermissions.AddRange(existingPermissionsToAdd.Select(c => new ProjectRolePermissions { ProjectRoleId = id, ProjectPermissionSlug = c.ProjectPermissionSlug }));
             }

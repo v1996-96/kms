@@ -420,7 +420,8 @@ namespace kms.Controllers
                 return NotFound();
             }
 
-            var protocol = Request.IsHttps ? "https://" : "http://";
+            // var protocol = Request.IsHttps ? "https://" : "http://";
+            var protocol = Request.Scheme + "://";
 
             var attachmentsQuery = _db.Attachments.Where(c => c.DocumentId == document.DocumentId).OrderByDescending(c => c.TimeCreated);
             var count = await attachmentsQuery.CountAsync();

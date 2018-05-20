@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using kms.Utils;
+using kms.Services;
 
 namespace kms.Controllers
 {
@@ -21,35 +22,43 @@ namespace kms.Controllers
         private readonly KMSDBContext _db;
         private readonly IPasswordHasher<Users> _passwordHasher;
         private readonly ISearchRepository _search;
+        private readonly IMailingService _mail;
 
-        public UsersController(KMSDBContext context, IPasswordHasher<Users> passwordHasher, ISearchRepository search)
+        public UsersController(KMSDBContext context, IPasswordHasher<Users> passwordHasher, ISearchRepository search, IMailingService mail)
         {
+            this._mail = mail;
             this._db = context;
             this._passwordHasher = passwordHasher;
             this._search = search;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query) {
+        public async Task<IActionResult> GetList([FromQuery] int? offset, [FromQuery] int? limit, [FromQuery] string query)
+        {
             IQueryable<Users> usersQuery;
 
-            if (query.IsValidQuery()) {
+            if (query.IsValidQuery())
+            {
                 usersQuery = _search.SearchUsers(query);
-            } else {
+            }
+            else
+            {
                 usersQuery = _db.Users.OrderByDescending(u => u.UserId);
             }
 
             var count = await usersQuery.CountAsync();
-            var users = await usersQuery.Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
+            var users = await usersQuery.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).Skip(offset.HasValue ? offset.Value : 0).Take(limit.HasValue ? limit.Value : 50).ToListAsync();
             var results = users.Select(u => new UserShortDto(u));
             return Ok(new { count, results });
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetSingle([FromRoute] int id) {
+        public async Task<IActionResult> GetSingle([FromRoute] int id)
+        {
             var user = await GetById(id);
 
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound();
             }
 
@@ -57,20 +66,25 @@ namespace kms.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UserDto updatedUser) {
-            if (updatedUser == null) {
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UserDto updatedUser)
+        {
+            if (updatedUser == null)
+            {
                 return BadRequest();
             }
 
             var user = await GetById(id);
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound();
             }
 
             // If email was changed
-            if (updatedUser.Email != user.Email) {
+            if (updatedUser.Email != user.Email)
+            {
                 var userByEmail = await _db.Users.SingleOrDefaultAsync(u => u.Email == updatedUser.Email);
-                if (userByEmail != null) {
+                if (userByEmail != null)
+                {
                     throw new Exception("Username with provided email already exists.");
                 }
                 user.Email = updatedUser.Email;
@@ -80,27 +94,31 @@ namespace kms.Controllers
             user.Surname = updatedUser.Surname;
             user.Avatar = updatedUser.Avatar;
 
-            if (user.UserCompetences == null) {
+            if (user.UserCompetences == null)
+            {
                 user.UserCompetences = new List<UserCompetences>();
             }
-            if (user.UserRoles == null) {
+            if (user.UserRoles == null)
+            {
                 user.UserRoles = new List<UserRoles>();
             }
 
-            if (updatedUser.Competences != null) {
-                var toDelete = user.UserCompetences.Where(uc => !updatedUser.Competences.Select(c => c.CompetenceId).Contains(uc.CompetenceId)).Select(uc => uc.CompetenceId);
+            if (updatedUser.Competences != null)
+            {
+                var toDelete = user.UserCompetences.Where(uc => !updatedUser.Competences.Select(c => c.CompetenceId).Contains(uc.CompetenceId) && uc.UserId == id).Select(uc => uc.CompetenceId);
                 var toAdd = updatedUser.Competences.Where(u => !user.UserCompetences.Select(uc => uc.CompetenceId).Contains(u.CompetenceId)).Select(c => c.CompetenceId);
-                _db.UserCompetences.RemoveRange(_db.UserCompetences.Where(uc => toDelete.Contains(uc.CompetenceId)));
+                _db.UserCompetences.RemoveRange(_db.UserCompetences.Where(uc => toDelete.Contains(uc.CompetenceId) && uc.UserId == id));
                 var existingCompetencesToAdd = await _db.Competences.Where(uc => toAdd.Contains(uc.CompetenceId)).ToListAsync();
-                _db.UserCompetences.AddRange(existingCompetencesToAdd.Select(c => new UserCompetences{ UserId = id, CompetenceId = c.CompetenceId }));
+                _db.UserCompetences.AddRange(existingCompetencesToAdd.Select(c => new UserCompetences { UserId = id, CompetenceId = c.CompetenceId }));
             }
 
-            if (updatedUser.Roles != null) {
-                var toDelete = user.UserRoles.Where(uc => !updatedUser.Roles.Select(c => c.RoleId).Contains(uc.RoleId)).Select(uc => uc.RoleId);
+            if (updatedUser.Roles != null)
+            {
+                var toDelete = user.UserRoles.Where(uc => !updatedUser.Roles.Select(c => c.RoleId).Contains(uc.RoleId) && uc.UserId == id).Select(uc => uc.RoleId);
                 var toAdd = updatedUser.Roles.Where(u => !user.UserRoles.Select(uc => uc.RoleId).Contains(u.RoleId)).Select(c => c.RoleId);
-                _db.UserRoles.RemoveRange(_db.UserRoles.Where(uc => toDelete.Contains(uc.RoleId)));
+                _db.UserRoles.RemoveRange(_db.UserRoles.Where(uc => toDelete.Contains(uc.RoleId) && uc.UserId == id));
                 var existingRolesToAdd = await _db.Roles.Where(uc => toAdd.Contains(uc.RoleId)).ToListAsync();
-                _db.UserRoles.AddRange(existingRolesToAdd.Select(c => new UserRoles{ UserId = id, RoleId = c.RoleId }));
+                _db.UserRoles.AddRange(existingRolesToAdd.Select(c => new UserRoles { UserId = id, RoleId = c.RoleId }));
             }
 
             await _db.SaveChangesAsync();
@@ -109,10 +127,12 @@ namespace kms.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteSingle([FromRoute] int id) {
+        public async Task<IActionResult> DeleteSingle([FromRoute] int id)
+        {
             var user = await _db.Users.SingleOrDefaultAsync(u => u.UserId == id);
 
-            if (user == null) {
+            if (user == null)
+            {
                 return NotFound();
             }
 
@@ -122,34 +142,43 @@ namespace kms.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteMultiple([FromQuery] int[] ids) {
+        public async Task<IActionResult> DeleteMultiple([FromQuery] int[] ids)
+        {
             _db.Users.RemoveRange(_db.Users.Where(u => ids.Contains(u.UserId)));
             await _db.SaveChangesAsync();
             return Ok();
         }
 
         [HttpPost("invite")]
-        public async Task<IActionResult> Invite([FromBody] InviteCreateDto invite) {
+        public async Task<IActionResult> Invite([FromBody] InviteCreateDto invite)
+        {
             var userByEmail = await _db.Users.SingleOrDefaultAsync(u => u.Email == invite.Email);
 
-            if (userByEmail != null) {
+            if (userByEmail != null)
+            {
                 throw new Exception("User with provided email is already registered");
             }
 
             var existingToken = await _db.InviteTokens.SingleOrDefaultAsync(t => t.Email == invite.Email);
-            if (existingToken != null) {
+            if (existingToken != null)
+            {
                 existingToken.TimeCreated = DateTime.UtcNow;
                 await _db.SaveChangesAsync();
                 return Ok(existingToken);
             }
 
-            var inviteToken = new InviteTokens{
-                Token = _passwordHasher.HashPassword(new Users{ Email = invite.Email }, Guid.NewGuid().ToString()).Replace("+", string.Empty).Replace("=", string.Empty).Replace("/", string.Empty),
+            var inviteToken = new InviteTokens
+            {
+                Token = _passwordHasher.HashPassword(new Users { Email = invite.Email }, Guid.NewGuid().ToString()).Replace("+", string.Empty).Replace("=", string.Empty).Replace("/", string.Empty),
                 Email = invite.Email,
                 TimeCreated = DateTime.UtcNow
             };
             _db.InviteTokens.Add(inviteToken);
             await _db.SaveChangesAsync();
+
+            string currentUrl = Request.Scheme + "://" + Request.Host.Host + "/signup/" + inviteToken.Token;
+            await _mail.SendAsync(invite.Email, "Signup KMS", "<a href='" + @currentUrl + "'>Signup link</a>");
+
             return Ok(inviteToken);
         }
 

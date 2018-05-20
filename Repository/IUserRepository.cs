@@ -8,7 +8,7 @@ namespace kms.Repository
     public interface IUserRepository
     {
         Task<ProfileDto> GetProfile(int id);
-        Task<ICollection<Roles>> GetRoles(int id);
-        Task<ICollection<Permissions>> GetPermissions(int id);
+        Task<IEnumerable<Roles>> GetRoles(int id);
+        Task<IEnumerable<Permissions>> GetPermissions(int id);
     }
 }

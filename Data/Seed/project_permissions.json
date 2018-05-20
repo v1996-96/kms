@@ -1,4 +1,5 @@
 [
+    { "project_permission_slug": "access_settings", "name": "Access settings" },
     { "project_permission_slug": "read_project_team", "name": "Read project team" },
     { "project_permission_slug": "create_project_team", "name": "Create project team" },
     { "project_permission_slug": "update_project_team", "name": "Update project team" },

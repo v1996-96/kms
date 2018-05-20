@@ -2,6 +2,7 @@
     {
         "name": "Manager",
         "permissions": [
+            "access_settings",
             "read_project_team",
             "create_project_team",
             "update_project_team",

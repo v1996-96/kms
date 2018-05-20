@@ -7,7 +7,7 @@ namespace kms.Models
 {
     public class ProjectDto
     {
-        public ProjectDto(Projects project, int membersCount = 0)
+        public ProjectDto(Projects project, int membersCount = 0, IEnumerable<string> permissions = null)
         {
             QuickLinks = new List<QuickLinkShortDto>();
 
@@ -29,6 +29,7 @@ namespace kms.Models
             }
 
             MembersCount = membersCount;
+            Permissions = permissions;
         }
         public int ProjectId { get; set; }
         public string Slug { get; set; }
@@ -42,5 +43,6 @@ namespace kms.Models
         public bool IsActive { get; set; }
         public int MembersCount { get; set; }
         public IEnumerable<QuickLinkShortDto> QuickLinks { get; set; }
+        public IEnumerable<string> Permissions { get; set; }
     }
 }

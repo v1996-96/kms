@@ -72,7 +72,14 @@ namespace kms.Controllers
 
             var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == project.ProjectId).CountAsync();
 
-            return Ok(new ProjectDto(project, membersCount));
+            var permissions = await _dbconnection.QueryAsync<string>(
+                @"select pp.project_permission_slug from project_permissions as pp
+                left join project_role_permissions as prp on prp.project_permission_slug = pp.project_permission_slug
+                left join project_team as pt on pt.project_role_id = prp.project_role_id
+                where pt.user_id = @user_id and pt.project_id = @project_id
+                group by pp.project_permission_slug", new { user_id = UserId, project_id = project.ProjectId });
+
+            return Ok(new ProjectDto(project, membersCount, permissions));
         }
 
         [HttpPost]
@@ -187,7 +194,14 @@ namespace kms.Controllers
             await _db.Entry(newProject).Collection(b => b.QuickLinksHousingProject).LoadAsync();
             var membersCount = await _db.ProjectTeam.Where(pt => pt.ProjectId == newProject.ProjectId).CountAsync();
 
-            return Ok(new ProjectDto(newProject, membersCount));
+            var permissions = await _dbconnection.QueryAsync<string>(
+                @"select pp.project_permission_slug from project_permissions as pp
+                left join project_role_permissions as prp on prp.project_permission_slug = pp.project_permission_slug
+                left join project_team as pt on pt.project_role_id = prp.project_role_id
+                where pt.user_id = @user_id and pt.project_id = @project_id
+                group by pp.project_permission_slug", new { user_id = UserId, project_id = newProject.ProjectId });
+
+            return Ok(new ProjectDto(newProject, membersCount, permissions));
         }
 
         [HttpPut("{id:int}")]
